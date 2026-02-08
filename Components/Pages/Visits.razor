@@ -1,0 +1,230 @@
+﻿@page "/visits"
+
+@using VisitSchool.Models
+@using VisitSchool.Services
+
+@inject StudentService StudentService
+@inject VisitService VisitService
+@inject ScheduleService ScheduleService;
+
+<div class="container">
+    <h3 class="mb-3">Посещения</h3>
+
+    <div class="mb-3">
+        <label class="form-label">Расписание</label>
+        <select class="form-select"
+                @bind="selectedScheduleId"
+                @bind:after="OnScheduleChange">
+            <option value=""></option>
+            @foreach (var itm in schedules)
+            {
+                <option value="@itm.Id">@itm.ScheduleName</option>
+            }
+        </select>
+    </div>
+
+    @if (selectedScheduleId != null)
+    {
+        <div class="container d-flex overflow-auto mb-1 border-bottom pb-1">
+            @foreach (var date in dates)
+            {
+                <button class="btn me-2 mt-5 @(date == selectedDate ? "btn-primary" : "btn-outline-primary")"
+                        @onclick="()=> SelectDate(date)">
+                    @date.ToString("dd MMM", new System.Globalization.CultureInfo("ru-RU"))
+                </button>
+            }
+        </div>
+
+            <button class="btn btn-success" @onclick="Editing">Редактировать</button>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Отметка</th>
+                        <th>ФИО</th>
+                        <th>Группа</th>
+                        <th>Скидка</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var g in grouppedStudents)
+                    {
+                        var collapseId = $"grp-{g.Key}";
+                        <tr class="table-secondary">
+                            <td colspan="4">
+                                <button class="accordion-button-collapse" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#@collapseId"
+                                        aria-expanded="false" aria-controls="@collapseId">
+                                    @groups[g.Key].Name (@g.Value.Count())
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" class="p-0">
+                                <div class="collapse" id="@collapseId">
+                                    <table class="table mb-0">
+                                        <tbody>
+                                            @foreach (var student in g.Value)
+                                            {
+                                                var row = attendanceRows.FirstOrDefault(x => x.StudentId == student.Id);
+                                                <tr>
+                                                    @if(isEditing)
+                                                    {
+                                                        <td>
+                                                            <select class="form-select"
+                                                                    @bind="row.Status">
+                                                                <option value="0">не был</option>
+                                                                <option value="1">был</option>
+                                                                <option value="2">был 1 час</option>
+                                                                <option value="3">болеет</option>
+                                                            </select>
+                                                        </td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td>@row.Status</td>
+                                                    }
+
+                                                    <td>@student.Fullname</td>
+                                                    <td>@student.GroupId</td>
+                                                    <td>@student.StudentCategory?.DscountPercent ?? 0</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <button class="btn btn-success" @onclick="Save">Сохранить</button>
+    }
+</div>
+
+
+@code 
+{
+    public class AttendenceRow
+    {
+        public int StudentId { get; set; }
+        public int Status { get; set; }
+    }
+
+    private DateTime currentDate;
+
+    private int? selectedScheduleId = null;
+    private DateTime? selectedDate = null;
+
+    private Dictionary<int, Group> groups = new();
+    private List<Schedule> schedules = new();
+    private List<Student> students = new();
+    private List<DateTime> dates = new();
+
+    private Dictionary<int, List<Student>> grouppedStudents = new();
+
+    private List<AttendenceRow> attendanceRows = new();
+
+    private bool isEditing;
+    private bool isLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        isEditing = false;
+
+        schedules = await ScheduleService.GetAllSchedules();
+        students = await StudentService.GetAllStudentsAsync();
+        var grps = await StudentService.GetAllGroupsAsync();
+        groups = grps.ToDictionary(x => x.Id);
+        groups.Add(-1, new Group { Id = -1, Name="<без группы>" });
+
+        grouppedStudents = students.GroupBy(s => s.GroupId ?? -1)
+                                   .OrderBy(g => g.Key)
+                                   .ToDictionary(g=> g.Key, g=> g.ToList());
+
+        attendanceRows = students.Select(x => new AttendenceRow
+        {
+            StudentId = x.Id,
+            Status = 0
+        })
+        .ToList();
+
+        isLoading = false;
+    }
+
+    private void SelectDate(DateTime date)
+    {
+        selectedDate = date;
+
+        attendanceRows.Clear();
+
+        var existsVisits = VisitService.GetVisitsByDate(date);
+
+        foreach (var s in students)
+        {
+            var visit = existsVisits.FirstOrDefault(x => x.StudentId == s.Id);
+            attendanceRows.Add(new AttendenceRow
+            {
+                StudentId = s.Id,
+                Status = visit == null ? 0 : visit.Status 
+            });
+        }
+
+        StateHasChanged();
+    }
+
+    private void Save()
+    {
+        if (selectedScheduleId == null)
+        {
+            return;
+        }
+
+        if (selectedDate == null)
+        {
+            return;
+        }
+
+        isLoading = true;
+        //сохраняем значения в сервисе
+        foreach (var row in attendanceRows)
+        {
+            //пустые значения не записываем
+            if (row.Status != 0)
+            {
+                VisitService.AddVisit(new Dtos.AddStudentVisitDto
+                    (selectedScheduleId.Value, row.StudentId, selectedDate.Value.Day, row.Status));
+            }
+        }
+
+        isLoading = false;
+        isEditing = false;
+        StateHasChanged();
+    }
+
+    private void OnScheduleChange()
+    {
+        dates.Clear();
+        attendanceRows.Clear();
+
+        if (selectedScheduleId == null)
+        {
+            return;
+        }
+
+        var schedule = schedules.FirstOrDefault(x => x.Id == selectedScheduleId);
+        foreach (var d in schedule.Days)
+        {
+            dates.Add(new DateTime(schedule.Year, schedule.Month, d.Day));
+        }
+
+        var firstDate = dates.FirstOrDefault();
+        SelectDate(firstDate);
+    }
+
+    private void Editing(MouseEventArgs e)
+    {
+        isEditing = !isEditing;
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,18 @@
+﻿@page "/settings"
+
+@namespace VisitSchool.Services
+@inject SettingsService service
+
+<h3>Настройки</h3>
+
+<h2>@service.GetVersionApp()</h2>
+<button class="btn btn-danger">Очистить данные</button>
+
+@code 
+{
+
+    private async Task OnDeleteDbData()
+    {
+        
+    }
+}

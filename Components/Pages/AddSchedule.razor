@@ -1,0 +1,231 @@
+﻿@page "/add-schedule/{id:int?}"
+
+
+@inject VisitSchool.Services.ScheduleService service;
+
+@if (Id != null)
+{
+    <h3>Редактирование расписания</h3>
+}
+else
+{
+    <h3>Добавить расписание</h3>
+}
+
+ <!-- Выбор месяца и названия расписания -->
+<div class="row mb-4 align-items-center">
+    <div class="col-md-4">
+        <label for="monthSelect" class="form-label">Выберите месяц:</label>
+        <select id="monthSelect" class="form-select"
+                @onchange="(e)=>UpdateScheduleName(int.Parse(e.Value.ToString()))">
+            @for (int i = 0; i < months.Length; i++)
+            {
+                <option value="@i">@months[i]</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-8">
+        <label for="scheduleName" class="form-label">Название расписания:</label>
+        <input id="scheduleName" type="text" class="form-control" @bind="scheduleName" readonly />
+    </div>
+
+    <div class="col-md-4">
+        <label>Стоимость абонемента</label>
+        <input type="number" class="form-control" @bind="costSubscriptions"/>
+    </div>
+</div>
+
+<div class="row text-center fw-bold mb-2">
+    @foreach (var d in weekHeaders)
+    {
+        <div class="col border py-2 @(d.IsWeekend ? "text-danger" : "")">
+            @d.Name
+        </div>
+    }
+</div>
+<!-- Кнопки дней -->
+@foreach (var week in weeks)
+{
+    <div class="row text-center">
+        @foreach (var day in week)
+        {
+            if (day == null)
+            {
+                <div class="col border p-2 bg-light"></div>
+            }
+            else
+            {
+                <div class="col border p-2">
+                    <button class="btn w-100
+                                   @(SelectedDays.Contains(day.Value) ? "btn-primary" : "btn-outline-secondary")"
+                            @onclick="() => ToggleDaySelection(day.Value)">
+                        @day.Value.Day
+                    </button>
+                </div>
+            }
+        }
+    </div>
+}
+
+<!-- Кнопка сохранить -->
+<div class="row">
+    <div class="col-4">
+        <button type="button" class="btn btn-success" 
+                @onclick="SaveSchedule">
+            Сохранить расписание
+        </button>
+    </div>
+</div>
+
+
+
+@code 
+{
+    [Parameter]
+    public int? Id { get; set; }
+
+    private int currentYear = DateTime.Now.Year;
+
+    private int selectedMonthIndex;
+
+    private string[] months = new string[] 
+    { "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", 
+      "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"};
+
+    List<(string Name, bool IsWeekend)> weekHeaders = new()
+    {
+        ("Пн", false), ("Вт", false), ("Ср", false), ("Чт", false),
+        ("Пт", false), ("Сб", true), ("Вс", true)
+    };
+
+    List<List<DateTime?>> weeks = new();
+
+    private string scheduleName = string.Empty;
+
+    private decimal costSubscriptions = 0;
+
+    private HashSet<DateTime> SelectedDays { get; set; } = new HashSet<DateTime>(); // Храним выбранные дни
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (Id != null)
+        {
+            var loadedSchedule = await service.GetSchedule(Id.Value);
+
+            costSubscriptions = loadedSchedule.CostSubscriptions;
+            selectedMonthIndex = loadedSchedule.Month-1;
+
+            scheduleName = $"{months[selectedMonthIndex]} {loadedSchedule.Year}";
+
+            int daysInMonth = DateTime.DaysInMonth(loadedSchedule.Year, loadedSchedule.Month);
+            List<DateTime> allDays = new List<DateTime>();
+            for (int day = 1; day <= daysInMonth; day++)
+            {
+                var newDay = new DateTime(currentYear, selectedMonthIndex + 1, day);
+                allDays.Add(newDay);
+                if (loadedSchedule.Days.FirstOrDefault(x=>x.Day == day) != null)
+                {
+                    ToggleDaySelection(newDay);
+                }
+            }
+            BuildCalendar(allDays);
+
+            StateHasChanged();
+        }
+    }
+
+    private void UpdateScheduleName(int index)
+    {
+        selectedMonthIndex = index;
+        scheduleName = $"{months[selectedMonthIndex]} {currentYear}";
+        SelectedDays.Clear(); // Очищаем выбранные дни при смене месяца
+
+        int daysInMonth = DateTime.DaysInMonth(currentYear, selectedMonthIndex+1);
+        List<DateTime> allDays = new List<DateTime>();
+        for (int day = 1; day <= daysInMonth; day++)
+        {
+            allDays.Add(new DateTime(currentYear, selectedMonthIndex + 1, day));
+        }
+        BuildCalendar(allDays);
+
+        StateHasChanged(); // Обновляем UI, чтобы кнопки дней перерисовались
+    }
+
+    private void ToggleDaySelection(DateTime day)
+    {
+        if (SelectedDays.Contains(day))
+        {
+            SelectedDays.Remove(day);
+        }
+        else
+        {
+            SelectedDays.Add(day);
+        }
+    }
+
+    private async Task SaveSchedule()
+    {
+        if (SelectedDays.Count == 0)
+        {
+            return;
+        }
+
+        var days = SelectedDays.Select(x=>x.Day).ToList();
+        var schedule = new VisitSchool.Models.Schedule
+        {
+             CostSubscriptions = costSubscriptions,
+             Month = selectedMonthIndex + 1,
+             ScheduleName = months[selectedMonthIndex],
+             Year = currentYear,
+             Days = new List<Models.ScheduleDay>(days.Count)
+        };
+        foreach (var d in days)
+        {
+            schedule.Days.Add(new Models.ScheduleDay{ Schedule = schedule, Day = d });
+        }
+
+        if (Id != null)
+        {
+            await service.UpdateShedule(schedule);
+        }
+        else
+        {
+            await service.AddSchedule(schedule);
+        }
+
+
+        SelectedDays.Clear();
+    }
+
+    private void BuildCalendar(List<DateTime> dates)
+    {
+        weeks.Clear();
+
+        var ordered = dates.OrderBy(x=>x).ToList();
+        var first = ordered.First();
+
+        int shift = ((int)first.DayOfWeek + 6) % 7; //Пн
+
+        var temp = new List<DateTime?>();
+
+        for (int i = 0; i < shift; i++)
+        {
+            temp.Add(null);
+        }
+
+        foreach (var d in ordered)
+        {
+            temp.Add(d);
+        }
+
+        while (temp.Count % 7 != 0)
+        {
+            temp.Add(null);
+        }
+
+        for (int i = 0; i < temp.Count; i += 7)
+        {
+            weeks.Add(temp.Skip(i).Take(7).ToList());
+        }
+    }
+}

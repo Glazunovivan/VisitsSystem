@@ -1,0 +1,116 @@
+﻿@page "/calculate"
+
+@using VisitSchool.Dtos
+@using VisitSchool.Models
+@using VisitSchool.Services
+
+@inject CalculateService serviceCalc
+@inject ScheduleService serviceSchedules
+
+<h3>Рассчет стоимости</h3>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-4">
+        <label class="form-label">Выберите расписание</label>
+        <select class="form-select"
+                @bind="selectedScheduleId">
+            <option value=""></option>
+            @foreach (var itm in schedules)
+            {
+                <option value="@itm.Id">@itm.ScheduleName</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-4 d-flex align-items-end">
+        <button class="btn btn-primary w-100" @onclick="Calc">
+            Рассчитать
+        </button>
+    </div>
+</div>
+
+@if (isLoading)
+{
+    <div class="d-flex align-items-center">
+        <strong>Считаем...</strong>
+        <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+    </div>
+}
+else
+{
+    @if (results?.Any() == true)
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ФИО</th>
+                    <th>Кол-во посещений</th>
+                    <th>Кол-во отсутствий</th>
+                    <th>Кол-во болел</th>
+                    <th>Скидка</th>
+                    <th>К оплате</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in results)
+                {
+                    <tr>
+                        <td>@item.StudentFullname</td>
+                        <td>@item.CountVisit</td>
+                        <td>@item.CountMissing</td>
+                        <td>@item.CountSick</td>
+                        <td>@item.Discount</td>
+                        <td>@item.Cost</td>
+                        <td><button class="btn">Подробнее</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+
+@code {
+
+    private bool isLoading;
+
+    private DateTime? startDate;
+    private DateTime? endDate;
+
+    private int? selectedScheduleId = null;
+    private List<CostVisitStudentDto> results;
+
+    private List<Schedule> schedules;
+
+    // Метод выполняется при загрузке страницы
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+
+        schedules = await serviceSchedules.GetAllSchedules();
+
+        int currentYear = DateTime.Now.Year;
+        int currentMonth = DateTime.Now.Month;
+
+        selectedScheduleId = schedules.FirstOrDefault(x=>x.Year == currentYear && x.Month == currentMonth)?.Id ?? null;
+
+        isLoading = false;
+    }
+
+    private async Task Calc()
+    {
+        if (selectedScheduleId == null)
+        {
+            return;
+        }
+
+        isLoading = true;
+
+        results = new List<CostVisitStudentDto>(30);
+        results.AddRange(await serviceCalc.CalculateCostVisits(selectedScheduleId.Value));
+
+        isLoading = false;
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,77 @@
+﻿@using VisitSchool.Models
+@using VisitSchool.Services
+
+@inject GroupService service
+
+@if (IsVisible)
+{
+    <!-- Фон модального окна -->
+    <div class="modal-backdrop fade show"></div>
+
+    <!-- Само модальное окно -->
+    <div class="modal show d-block" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title">Создание новой категории скидки</h5>
+                    <button type="button" class="btn-close" @onclick="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Название</label>
+                        <input class="form-control" @bind="name" placeholder="Введите название..." @onkeyup="HandleKeyUp" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Скидка</label>
+                        <input class="form-control" @bind="discount" placeholder="Введите целое число процентов" @onkeyup="HandleKeyUp" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="Close">Отмена</button>
+                    <button type="button" class="btn btn-primary" @onclick="Save" disabled="@string.IsNullOrWhiteSpace(name)">
+                        Сохранить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnSaved { get; set; }
+
+    private string name = string.Empty;
+    private double discount = 0d;
+
+    private async Task Save()
+    {
+        if (discount <= 0)
+        {
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            await service.AddGroup(name);
+            name = string.Empty;
+            await OnSaved.InvokeAsync(); // Уведомляем родительский контрол, что данные сохранены
+            await Close();
+        }
+    }
+
+    private async Task Close()
+    {
+        await OnClose.InvokeAsync();
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Save();
+        }
+    }
+}

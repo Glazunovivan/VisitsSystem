@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisitSchool", "VisitSchool.csproj", "{5120B2C5-E124-482A-B3DA-A411317108D8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		MigrationDb|Any CPU = MigrationDb|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5120B2C5-E124-482A-B3DA-A411317108D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5120B2C5-E124-482A-B3DA-A411317108D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5120B2C5-E124-482A-B3DA-A411317108D8}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{5120B2C5-E124-482A-B3DA-A411317108D8}.MigrationDb|Any CPU.ActiveCfg = MigrationDb|Any CPU
+		{5120B2C5-E124-482A-B3DA-A411317108D8}.MigrationDb|Any CPU.Build.0 = MigrationDb|Any CPU
+		{5120B2C5-E124-482A-B3DA-A411317108D8}.MigrationDb|Any CPU.Deploy.0 = MigrationDb|Any CPU
+		{5120B2C5-E124-482A-B3DA-A411317108D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5120B2C5-E124-482A-B3DA-A411317108D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5120B2C5-E124-482A-B3DA-A411317108D8}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6ED21423-5523-4669-A703-43BE0CD89892}
+	EndGlobalSection
+EndGlobal

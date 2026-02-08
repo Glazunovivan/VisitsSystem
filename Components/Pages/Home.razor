@@ -1,0 +1,42 @@
+﻿@page "/"
+@inject NavigationManager Nav
+
+<div class="container py-3">
+    <div class="row g-3">
+        <div class="col-6">
+            <div class="card h-100 card-button shadow-sm text-center" @onclick='() => Nav.NavigateTo("/add-student")'>
+                <div class="card-body">
+                    <div class="display-4 mb-2"></div>
+                    <h6 class="card-title">Добавить учеников</h6>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6">
+            <div class="card h-100 card-button shadow-sm text-center" @onclick='() => Nav.NavigateTo("/visits")'>
+                <div class="card-body">
+                    <div class="display-4 mb-2"></div>
+                    <h6 class="card-title">Посещения</h6>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6">
+            <div class="card h-100 card-button shadow-sm text-center" @onclick='() => Nav.NavigateTo("/calculate")'>
+                <div class="card-body">
+                    <div class="display-4 mb-2"></div>
+                    <h6 class="card-title">Рассчет стоимости</h6>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6">
+            <div class="card h-100 card-button shadow-sm text-center" @onclick='() => Nav.NavigateTo("/add-schedule")'>
+                <div class="card-body">
+                    <div class="display-4 mb-2"></div>
+                    <h6 class="card-title">Составить расписание</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

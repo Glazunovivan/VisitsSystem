@@ -1,0 +1,59 @@
+﻿@page "/schedules"
+@using VisitSchool.Models
+
+
+@inject NavigationManager NavManager
+@inject VisitSchool.Services.ScheduleService service;
+
+<div class="container d-inline-flex justify-content-md-start">
+    <div class="d-flex align-items-center">
+        <h3>Расписания</h3>
+        <button class="btn btn-primary" @onclick="CreateSchedule">
+            <span class="bi bi-plus-square"></span> Добавить расписание
+        </button>
+    </div>
+</div>
+
+<div class="container">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Кол-во дней</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var schedule in schedules)
+            {
+                <tr>
+                    <td>@schedule.ScheduleName</td>
+                    <td>@schedule.Days.Count</td>
+                    <td>
+                        <button class="btn btn-success" @onclick="()=>UpdateSchedule(schedule.Id)">Изменить</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code 
+{
+    private List<Schedule> schedules;
+
+    protected override async Task OnInitializedAsync()
+    {
+        schedules = await service.GetAllSchedules();
+    }
+
+    private void CreateSchedule()
+    {
+        NavManager.NavigateTo("/add-schedule");
+    }
+
+    private void UpdateSchedule(int id)
+    {
+        NavManager.NavigateTo($"/add-schedule/{id}");
+    }
+}

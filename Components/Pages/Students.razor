@@ -1,0 +1,124 @@
+﻿@page "/students"
+
+@using VisitSchool.Services
+@using VisitSchool.Models
+
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavManager
+@inject StudentService StudentService
+
+<h3>Ученики</h3>
+@if(isLoading)
+{
+    <div class="d-flex align-items-center">
+        <strong>Загрузка...</strong>
+        <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+    </div>
+}
+else
+{
+    <div>
+        <button class="btn btn-primary"
+                @onclick="AddStudent">
+                <i class="bi bi-plus-lg me-2"></i>Добавить ученика
+        </button>
+        <button class="btn btn-primary"
+                @onclick="AddGroup">
+            <i class="bi bi-plus-lg me-2"></i>Добавить группу
+        </button>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Имя</th>
+                        <th scope="col">Фамилия</th>
+                        <th scope="col">Отчество</th>
+                        <th scope="col">Группа</th>
+                        <th scope="col">Скидка</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in students)
+                    {
+                        <tr>
+                            <td>@s.Id</td>
+                            <td>@s.Name</td>
+                            <td>@s.Lastname</td>
+                            <td>@s.Surename</td>
+                            <td>@s.Group?.Name</td>
+                            <td>@s.StudentCategory?.DscountPercent</td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button class="btn btn-primary"
+                                            title="Редактировать"
+                                            @onclick="() => EditStudent(s.Id)">
+                                        <span class="bi bi-pencil" aria-hidden="true"></span>
+                                    </button>
+                                    <button class="btn btn-danger"
+                                            title="Удалить"
+                                            @onclick="() => ConfirmDelete(s)">
+                                        <span class="bi bi-trash" aria-hidden="true"></span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code 
+{
+    private bool isLoading;
+    private List<Student> students;
+
+    private void AddStudent()
+    {
+        NavManager.NavigateTo("/add-student");
+    }
+
+    private void AddGroup()
+    {
+        NavManager.NavigateTo("/add-group");    
+    }
+
+    private void EditStudent(int id)
+    {
+        NavManager.NavigateTo($"/add-student/{id}");
+    }
+
+    private async Task ConfirmDelete(Student student)
+    {
+        bool confirmed = await JSRuntime.InvokeAsync<bool>("confirm",
+            $"Вы уверены, что хотите удалить ученика {student.Name} {student.Lastname}?");
+
+        if (confirmed)
+        {
+            try
+            {
+                await StudentService.DeleteStudent(student.Id);
+                students = await StudentService.GetAllStudentsAsync();
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", $"Произошла ошибка при удалении ученика: {ex.InnerException?.Message + ex.Message}");
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+
+        // Заполнение списка
+        students = await StudentService.GetAllStudentsAsync();
+
+        isLoading = false;
+    }
+}

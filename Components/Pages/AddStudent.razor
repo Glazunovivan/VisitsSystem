@@ -1,0 +1,199 @@
+﻿@page "/add-student/{id:int?}"
+
+@using VisitSchool.Models
+@using VisitSchool.Services
+
+@inject StudentService StudentService
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+
+<div class="container py-3">
+    <div class="card p-3">
+        @if(Id == null)
+        {
+            <h5 class="card-title">Добавить ученика</h5>
+        }
+        else
+        {
+            <h5 class="card-title">Редактирование информации об ученике</h5>
+        }
+        
+        <div class="mb-2">
+            <label class="form-label">Имя</label>
+            <input class="form-control" @bind="name"/>
+        </div>
+        <div class="mb-2">
+            <label class="form-label">Фамилия</label>
+            <input class="form-control" rows="3" @bind="lastname"/>
+        </div>
+        <div class="mb-2">
+            <label class="form-label">Отчество</label>
+            <input class="form-control" rows="3" @bind="surename"/>
+        </div>
+        <div class="mb-2">
+            <label class="form-label">Группа</label>
+            <div class="d-flex align-items-center">
+                <select class="form-select" @bind="groupId">
+                    <option value=""></option>
+                    @foreach (var g in groups)
+                    {
+                        <option value="@g.Id">@g.Name</option>
+                    }
+                </select>
+                <button class="btn btn-primary"
+                        @onclick="ShowAddGroupModal">
+                    Добавить группу
+                </button>
+            </div>
+
+        </div>
+        <div class="mb-2">
+            <label class="form-label">Есть скидка</label>
+            <div class="d-flex align-items-center">
+                <select class="form-select" @bind="categoryId">
+                    <option value=""></option>
+                    @foreach (var dc in categoriesDiscount)
+                    {
+                        <option value="@dc.Id">@dc.DscountPercent</option>
+                    }
+                </select>
+                <button class="btn btn-primary"
+                        @onclick="ShowAddDiscountCategoryModal">
+                    Добавить категорию
+                </button>
+            </div>
+            
+        </div>
+        <button class="btn btn-primary w-100" @onclick="Save" disabled="@isSaving">
+            @(isSaving ? "Сохранение..." : "Сохранить")
+        </button>
+    </div>
+</div>
+
+<AddGroupModal  IsVisible="_isAddGroupVisible" 
+                OnClose="HideAddGroupModal" 
+                OnSaved="LoadGroups"/>
+
+<AddDiscountCategoryModal IsVisible="_isAddDiscountCategoryVisible" 
+                          OnClose="HideAddDiscountCategoryModal" 
+                          OnSaved="LoadDiscountCategories"/>
+
+
+@code 
+{
+    ///Переданный Id ученика для редактирования
+    [Parameter]
+    public int? Id { get; set; }
+
+
+    private bool isSaving;
+
+    #region Свойства для заполнения
+    private string name;
+    private string surename;
+    private string lastname;
+
+    private int groupId = 0;
+    private int categoryId = 0;
+
+    private List<Group> groups;
+    private List<DiscountCategory> categoriesDiscount;
+    #endregion
+
+    #region Modal
+    private bool _isAddGroupVisible = false;
+    private bool _isAddDiscountCategoryVisible = false;
+
+    private void ShowAddDiscountCategoryModal()
+    {
+        _isAddDiscountCategoryVisible = true;
+    }
+    private void HideAddDiscountCategoryModal()
+    {
+        _isAddDiscountCategoryVisible = false;
+    }
+
+    private void ShowAddGroupModal()
+    {
+        _isAddGroupVisible = true;
+    }
+    private void HideAddGroupModal()
+    {
+        _isAddGroupVisible = false;
+    }
+    #endregion
+
+    protected override async Task OnInitializedAsync()
+    {
+        if(Id != null)
+        {
+            var student = await StudentService.Get(Id.Value);
+
+            name = student.Name;
+            surename = student.Surename;
+            lastname = student.Lastname;
+            groupId = student.GroupId ?? 0;
+            categoryId = student.StudentCategoryId ?? 0;
+        }
+
+        await LoadGroups();
+        await LoadDiscountCategories();
+    }
+
+    private async Task Save()
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            await JS.InvokeVoidAsync("alert", "Введите имя ученика");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(lastname))
+        {
+            await JS.InvokeVoidAsync("alert", "Введите фамилию ученика");
+            return;
+        }
+
+        isSaving = true;
+        try
+        {
+            if(Id != null)
+            {
+                await StudentService.UpdateStudentAsync(Id.Value, name, surename, lastname, groupId, categoryId);
+                await JS.InvokeVoidAsync("alert", "Информация обновлена!");
+            }
+            else
+            {
+                await StudentService.AddStudentAsync(name, surename, lastname, groupId, categoryId);
+                await JS.InvokeVoidAsync("alert", "Ученик добавлен");
+            }
+
+            name = string.Empty;
+            lastname = string.Empty;
+            surename = string.Empty;
+            groupId = 0;
+            categoryId = 0;
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Ошибка: {ex.Message}");
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task LoadGroups()
+    {
+        groups = new List<Group>(2);
+        var g = await StudentService.GetAllGroupsAsync();
+        groups.AddRange(g);
+    }
+
+    private async Task LoadDiscountCategories()
+    {
+        categoriesDiscount = await StudentService.GetAllDiscountCategories();
+    }
+}

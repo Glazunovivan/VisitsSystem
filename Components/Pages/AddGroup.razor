@@ -1,0 +1,35 @@
+﻿@page "/add-group"
+
+@using VisitSchool.Models
+@using VisitSchool.Services
+
+@inject GroupService service;
+
+<div class="container">
+    <h3>Создание новой группы</h3>
+
+    <div class="card p-3">
+        <div class="mb-2">
+            <label class="form-label">Название группы</label>
+            <input class="form-control" @bind="name" />
+        </div>
+    </div>
+</div>
+
+@code 
+{
+
+    private string name;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
+
+    private async Task AddGroupEntity()
+    {
+        await service.AddGroup(name);
+
+        name = string.Empty;
+    }
+}
