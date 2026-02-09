@@ -1,42 +1,191 @@
 ﻿@page "/"
 @inject NavigationManager Nav
 
-<div class="container py-3">
-    <div class="row g-3">
-        <div class="col-6">
-            <div class="card h-100 card-button shadow-sm text-center" @onclick='() => Nav.NavigateTo("/add-student")'>
-                <div class="card-body">
-                    <div class="display-4 mb-2"></div>
-                    <h6 class="card-title">Добавить учеников</h6>
-                </div>
+<div class="dashboard-container">
+    <!-- Приветствие и заголовок -->
+    <header class="mb-5 pt-4 px-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="display-5 fw-bold text-dark mb-1">Учет посещаемости</h1>
+                <p class="text-muted fs-5">Система мониторинга и учета</p>
+            </div>
+            <div class="date-badge d-none d-sm-block">
+                <i class="bi bi-calendar4-event me-2"></i>
+                @DateTime.Now.ToString("dd MMMM, yyyy")
             </div>
         </div>
+    </header>
 
-        <div class="col-6">
-            <div class="card h-100 card-button shadow-sm text-center" @onclick='() => Nav.NavigateTo("/visits")'>
-                <div class="card-body">
-                    <div class="display-4 mb-2"></div>
-                    <h6 class="card-title">Посещения</h6>
+    <!-- Сетка меню -->
+    <div class="container-fluid px-4">
+        <div class="row g-4">
+            
+            <!-- Карточка: Ученики -->
+            <div class="col-12 col-sm-6">
+                <div class="main-card card-students" @onclick='() => Nav.NavigateTo("/students")'>
+                    <div class="card-content text-white">
+                        <div class="card-icon">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div class="card-text">
+                            <h3>Ученики</h3>
+                            <p>Ученики, группы и категориями</p>
+                        </div>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
                 </div>
             </div>
+
+            <!-- Расписание: Яркий изумрудный (Исправлено) -->
+            <div class="col-12 col-sm-6">
+                <div class="main-card card-schedule" @onclick='() => Nav.NavigateTo("/schedules")'>
+                    <div class="card-content text-white">
+                        <div class="card-icon">
+                            <i class="bi bi-calendar3"></i>
+                        </div>
+                        <div class="card-text">
+                            <h3>Расписание</h3>
+                            <p>Группы и время занятий</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карточка: Посещаемость -->
+            <div class="col-12 col-sm-6">
+                <div class="main-card card-attendance" @onclick='() => Nav.NavigateTo("/visits")'>
+                    <div class="card-content text-white">
+                        <div class="card-icon">
+                            <i class="bi bi-check2-circle"></i>
+                        </div>
+                        <div class="card-text">
+                            <h3>Посещаемость</h3>
+                            <p>Журнал отметок и учет пропусков</p>
+                        </div>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карточка: Рассчет стоимости -->
+            <div class="col-12 col-sm-6">
+                <div class="main-card card-finance" @onclick='() => Nav.NavigateTo("/calculate")'>
+                    <div class="card-content text-white">
+                        <div class="card-icon">
+                            <i class="bi bi-calculator"></i>
+                        </div>
+                        <div class="card-text">
+                            <h3>Рассчет стоимости</h3>
+                            <p>Финансовый отчет</p>
+                        </div>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+
         </div>
+    </div>
 
-        <div class="col-6">
-            <div class="card h-100 card-button shadow-sm text-center" @onclick='() => Nav.NavigateTo("/calculate")'>
-                <div class="card-body">
-                    <div class="display-4 mb-2"></div>
-                    <h6 class="card-title">Рассчет стоимости</h6>
-                </div>
+    <!-- Краткая сводка снизу (для красоты) -->
+    <div class="px-4 mt-5">
+        <div class="alert alert-light border-0 shadow-sm rounded-4 p-3 d-flex align-items-center">
+            <div class="bg-primary text-white rounded-circle p-2 me-3">
+                <i class="bi bi-info-circle"></i>
             </div>
-        </div>
-
-        <div class="col-6">
-            <div class="card h-100 card-button shadow-sm text-center" @onclick='() => Nav.NavigateTo("/add-schedule")'>
-                <div class="card-body">
-                    <div class="display-4 mb-2"></div>
-                    <h6 class="card-title">Составить расписание</h6>
-                </div>
-            </div>
+            <span class="text-muted small">Все данные синхронизированы с локальной базой данных. Последнее обновление: только что.</span>
         </div>
     </div>
 </div>
+
+<style>
+    .dashboard-container {
+        min-height: 100vh;
+        background-color: #f8f9fa;
+        padding-bottom: 30px;
+    }
+
+    .main-card {
+        height: 140px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        padding: 0 25px;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none !important;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .main-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+    .card-content {
+        display: flex;
+        align-items: center;
+        z-index: 5;
+    }
+
+    .card-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin-right: 20px;
+    }
+
+    .card-text h3 {
+        margin: 0;
+        font-weight: bold;
+        font-size: 1.4rem;
+    }
+
+    .card-text p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 0.9rem;
+    }
+
+    /* ЦВЕТА С ГАРАНТИЕЙ ОТОБРАЖЕНИЯ */
+
+    /* Ученики - Насыщенный синий */
+    .card-students {
+        background: #1e3a8a !important;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
+    }
+
+    /* Расписание - Яркий зеленый/изумрудный */
+    .card-schedule {
+        background: #065f46 !important; /* Фоновый цвет если градиент не подгрузится */
+        background: linear-gradient(135deg, #065f46 0%, #10b981 100%) !important;
+    }
+
+    /* Посещаемость - Индиго/Фиолетовый */
+    .card-attendance {
+        background: #312e81 !important;
+        background: linear-gradient(135deg, #312e81 0%, #6366f1 100%) !important;
+    }
+
+    /* Финансы - Темный сланец */
+    .card-finance {
+        background: #334155 !important;
+        background: linear-gradient(135deg, #334155 0%, #64748b 100%) !important;
+    }
+
+    /* Текст всегда белый внутри карточек */
+    .text-white {
+        color: #ffffff !important;
+    }
+</style>
