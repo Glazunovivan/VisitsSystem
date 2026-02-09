@@ -11,6 +11,11 @@
         /// Скидка в процентах
         /// </summary>
         public double DscountPercent { get; set; } = 0f;
+
+        /// <summary>
+        /// Название категории
+        /// </summary>
+        public string Name { get; set; } = string.Empty;
     
     }
 }

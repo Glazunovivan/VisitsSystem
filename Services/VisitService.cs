@@ -19,9 +19,30 @@ namespace VisitSchool.Services
         /// Добавить посещение
         /// </summary>
         /// <param name="date"></param>
-        public void AddVisit(AddStudentVisitDto visit)
+        public async Task AddOrUpdateVisit(AddStudentVisitDto visit)
         {
-            _visitsRepo.AddVisit(visit);
+            var existVisits = await _visitsRepo.GetVisitByStudentDate(visit.ScheduleId, visit.Day, visit.StudentId);
+           
+            if (existVisits != null)
+            {
+                await _visitsRepo.UpdateStatusVisitStudent(visit.ScheduleId, visit.Day, visit.StudentId, visit.Status);
+            }
+            else
+            {
+                await _visitsRepo.AddVisit(visit);
+            }
+        }
+
+        public async Task DeleteVisit(AddStudentVisitDto visit)
+        {
+            try
+            {
+                await _visitsRepo.DeleteVisit(visit.ScheduleId, visit.Day);
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
 
         /// <summary>

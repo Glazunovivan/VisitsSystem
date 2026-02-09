@@ -13,6 +13,8 @@ namespace VisitSchool.DataAccessLayer.EntityConfiguration
             builder.HasOne(x => x.Student);
 
             builder.HasOne(x=>x.Schedule);
+            builder.Property(x=>x.Id).ValueGeneratedOnAdd();
+        
         }
     }
 }

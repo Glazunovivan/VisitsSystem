@@ -1,0 +1,118 @@
+﻿@using VisitSchool.Dtos
+
+@if (IsVisible)
+{
+    <!-- Фон модального окна -->
+    <div class="modal-backdrop fade show"></div>
+
+    <!-- Само модальное окно -->
+    <div class="modal show d-block" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" @onclick="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Шапка с ФИО -->
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="bi bi-person-fill h2 mb-0"></i>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <p class="mb-0 small text-uppercase opacity-75 fw-bold">Отчет по ученику</p>
+                            <h2 class="mb-0 fw-bold">@CostVisitStudentDto.FullnameStudent</h2>
+                        </div>
+                        <div class="col-auto d-none d-md-block text-end">
+                            <span class="badge bg-white text-primary px-3 py-2 rounded-pill fw-bold">
+                                <i class="bi bi-calendar3 me-1"></i> @DateTime.Now.ToString("MMMM yyyy")
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row g-0 text-center border-bottom">
+                        <div class="col-6 col-md-3 border-end py-4">
+                            <div class="text-muted small mb-1">Всего дней</div>
+                            <div class="h4 fw-bold mb-0">@CostVisitStudentDto.CountDay</div>
+                        </div>
+                        <div class="col-6 col-md-3 border-end py-4">
+                            <div class="text-success small mb-1">Посещено</div>
+                            <div class="h4 fw-bold mb-0">@CostVisitStudentDto.CountVisit</div>
+                        </div>
+                        <div class="col-6 col-md-3 border-end py-4">
+                            <div class="text-danger small mb-1">Пропущено</div>
+                            <div class="h4 fw-bold mb-0">@CostVisitStudentDto.CountMissing</div>
+                        </div>
+                        <div class="col-6 col-md-3 py-4">
+                            <div class="text-warning-emphasis small mb-1">Болезнь</div>
+                            <div class="h4 fw-bold mb-0">@CostVisitStudentDto.CountSick</div>
+                        </div>
+                    </div>
+                    <!-- Блок оплаты и финансов -->
+                    <div class="col-12 col-xl-4">
+                        <div class="card border-0 shadow-sm border-top border-primary border-4 h-100">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="card-title mb-0 text-muted">Финансовый расчет</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                                        <div>
+                                            <div class="mb-0">Стоимость абонемента</div>
+                                            <small class="text-muted">Базовый тариф</small>
+                                        </div>
+                                        <span class="fw-bold">@CostVisitStudentDto.CostSubscription.ToString("N2") ₽</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                                        <div>
+                                            <div class="mb-0 text-danger">Скидка</div>
+                                            <small class="text-muted">Персональная</small>
+                                        </div>
+                                        <span class="badge bg-danger">@CostVisitStudentDto.Discount%</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-4 bg-light-subtle">
+                                        <div class="h5 mb-0">Итого к оплате</div>
+                                        <span class="h4 fw-bold text-primary mb-0">@CostVisitStudentDto.Cost.ToString("N2") ₽</span>
+                                    </li>
+                                </ul>
+
+                                <div class="mt-4">
+                                    <button class="btn btn-primary w-100 mb-2">
+                                        <i class="bi bi-printer me-2"></i> Печать отчета
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="Close">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code 
+{
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnSaved { get; set; }
+
+    [Parameter] public CostVisitStudentDto CostVisitStudentDto { get; set; } = null;
+
+
+    private async Task Close()
+    {
+        await OnClose.InvokeAsync();
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Close();
+        }
+    }
+}

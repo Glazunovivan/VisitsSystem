@@ -42,7 +42,7 @@ namespace VisitSchool.Repositories
         /// Все посещения ученика
         /// </summary>
         /// <returns></returns>
-        Task<List<Visit>> GetVisitByStudentId();
+        Task<List<Visit>> GetVisitByStudentId(int id);
 
         /// <summary>
         /// Исправить посещение
@@ -52,8 +52,38 @@ namespace VisitSchool.Repositories
         /// <returns></returns>
         Task UpdateVisitStudent(DateTime currentDateTime, DateTime newDateTime, int studentId);
 
+        /// <summary>
+        /// Обновить статус посещения
+        /// </summary>
+        /// <param name="scheduleId"></param>
+        /// <param name="month"></param>
+        /// <param name="day"></param>
+        /// <param name="studentId"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        Task UpdateStatusVisitStudent(int scheduleId, int day, int studentId, int status);
+
+        /// <summary>
+        /// Получить все посещения по Id расписания
+        /// </summary>
+        /// <param name="scheduleId"></param>
+        /// <returns></returns>
         Task<List<Visit>> GetVisitsByScheduleId(int scheduleId);
 
         Task IncludeSchedule(int scheduleId, Schedule schedule);
+
+        /// <summary>
+        /// Удалить посещение
+        /// </summary>
+        /// <param name="scheduleId"></param>
+        /// <param name="day"></param>
+        /// <returns></returns>
+        Task DeleteVisit(int scheduleId, int day);
+
+        /// <summary>
+        /// Получить посещение ученика по дате
+        /// </summary>
+        /// <returns></returns>
+        Task<Visit> GetVisitByStudentDate(int scheduleId, int day, int studentId);
     }
 }

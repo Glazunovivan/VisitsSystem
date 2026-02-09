@@ -9,6 +9,8 @@ namespace VisitSchool.DataAccessLayer.EntityConfiguration
         public void Configure(EntityTypeBuilder<DiscountCategory> builder)
         {
             builder.ToTable("DiscountCategories").HasKey(x=>x.Id);
+
+            builder.Property(x => x.Id).ValueGeneratedOnAdd();
         }
     }
 }

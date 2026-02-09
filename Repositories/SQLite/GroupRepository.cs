@@ -24,7 +24,7 @@ namespace VisitSchool.Repositories.SQLite
             await _db.SaveChangesAsync();
         }
 
-        public Task Delete(int id)
+        public async Task Delete(int id)
         {
             throw new NotImplementedException();
         }

@@ -10,12 +10,22 @@
         /// <summary>
         /// ФИО ученика
         /// </summary>
+        public string FullnameStudent {  get; set; }    
+
+        /// <summary>
+        /// ФИО ученика
+        /// </summary>
         public string StudentFullname { get; set; } = string.Empty;
 
         /// <summary>
         /// Стоимость
         /// </summary>
         public decimal Cost { get; set; }
+
+        /// <summary>
+        /// Количество дней в расписании
+        /// </summary>
+        public int CountDay { get; set; }
 
         /// <summary>
         /// Количество посещений

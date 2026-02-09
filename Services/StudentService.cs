@@ -83,20 +83,9 @@ namespace VisitSchool.Services
         }
 
 
-        public async Task<List<Group>> GetAllGroupsAsync()
-        {
-            return await _groupService.GetAllGroups() ?? new List<Group>();
-        }
-
-
         public async Task DeleteStudent(int id)
         {
             await _repo.DeleteAsync(id);
-        }
-
-        public async Task<List<DiscountCategory>> GetAllDiscountCategories()
-        {
-            return await _repo.GetAllDiscountCategories();
         }
     }
 }

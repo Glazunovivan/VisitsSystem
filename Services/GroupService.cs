@@ -16,7 +16,7 @@ namespace VisitSchool.Services
         /// Получить все группы
         /// </summary>
         /// <returns></returns>
-        public async Task<List<Group>> GetAllGroups()
+        public async Task<List<Group>> GetAllGroupsAsync()
         {
             return await _repo.GetAllGroupsAsync();
         }
@@ -28,6 +28,11 @@ namespace VisitSchool.Services
         public Task AddGroup(string name)
         {
             return _repo.Add(name);
+        }
+
+        public async Task Delete(int id)
+        {
+            await _repo.Delete(id);
         }
     }
 }

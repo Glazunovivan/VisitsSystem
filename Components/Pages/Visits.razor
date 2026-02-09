@@ -2,102 +2,108 @@
 
 @using VisitSchool.Models
 @using VisitSchool.Services
+@using System.Globalization
 
 @inject StudentService StudentService
 @inject VisitService VisitService
 @inject ScheduleService ScheduleService;
+@inject GroupService groupService;
 
-<div class="container">
+<div class="container-fluid py-3">
     <h3 class="mb-3">Посещения</h3>
 
-    <div class="mb-3">
-        <label class="form-label">Расписание</label>
-        <select class="form-select"
-                @bind="selectedScheduleId"
-                @bind:after="OnScheduleChange">
-            <option value=""></option>
-            @foreach (var itm in schedules)
-            {
-                <option value="@itm.Id">@itm.ScheduleName</option>
-            }
-        </select>
+    <div class="row g-3 align-items-end mb-4">
+        <div class="col-md-6 col-lg-4">
+            <label class="form-label fw-bold text-secondary small">Расписание</label>
+            <select class="form-select border-primary-subtle" @bind="selectedScheduleId" @bind:after="OnScheduleChange">
+                <option value=""></option>
+                @foreach (var itm in schedules)
+                {
+                    <option value="@itm.Id">@itm.ScheduleName</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-6 col-lg-8 d-flex justify-content-md-end">
+            <div class="btn-group shadow-sm" role="group" aria-label="Вид отображения">
+                <input type="radio" class="btn-check" name="viewmode" 
+                       id="v_group" checked="@(viewMode == ViewMode.ByGroups)" 
+                       @onclick="() => SetViewMode(ViewMode.ByGroups)">
+                <label class="btn btn-outline-primary" for="v_group">
+                    <i class="bi bi-grid-fill me-1"></i> По группам
+                </label>
+
+                <input type="radio" class="btn-check" 
+                       name="viewmode" id="v_all" 
+                       checked="@(viewMode == ViewMode.All)" @onclick="() => SetViewMode(ViewMode.All)">
+                <label class="btn btn-outline-primary" for="v_all">
+                    <i class="bi bi-list-ul me-1"></i> Все
+                </label>
+            </div>
+        </div>
     </div>
 
     @if (selectedScheduleId != null)
     {
-        <div class="container d-flex overflow-auto mb-1 border-bottom pb-1">
+        <div class="d-flex overflow-auto pb-3 mb-3 border-bottom custom-scrollbar">
             @foreach (var date in dates)
             {
-                <button class="btn me-2 mt-5 @(date == selectedDate ? "btn-primary" : "btn-outline-primary")"
-                        @onclick="()=> SelectDate(date)">
-                    @date.ToString("dd MMM", new System.Globalization.CultureInfo("ru-RU"))
+                <button class="btn btn-sm me-2 @(date.Date == selectedDate.Value.Date ? "btn-primary" : "btn-outline-secondary")" 
+                        @onclick="() => SelectDate(date)" style="min-width: 80px;">
+                    <div class="small">@date.ToString("ddd", new CultureInfo("ru-RU"))</div>
+                    <div class="fw-bold">@date.ToString("dd MMM", new CultureInfo("ru-RU"))</div>
                 </button>
             }
         </div>
 
-            <button class="btn btn-success" @onclick="Editing">Редактировать</button>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Отметка</th>
-                        <th>ФИО</th>
-                        <th>Группа</th>
-                        <th>Скидка</th>
-                    </tr>
-                </thead>
-                <tbody>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0 text-muted">@selectedDate.Value.ToString("D", new CultureInfo("ru-RU"))</h5>
+            @if (!isEditing)
+            {
+                <button class="btn btn-warning px-4" @onclick="() => isEditing = true">
+                    <i class="bi bi-pencil-square me-1"></i> Редактировать
+                </button>
+            }
+            else
+            {
+                <div class="btn-group">
+                    <button class="btn btn-success px-4" @onclick="Save">
+                        <i class="bi bi-check-lg me-1"></i> Сохранить
+                    </button>
+                    <button class="btn btn-outline-secondary" @onclick="() => isEditing = false">Отмена</button>
+                </div>
+            }
+        </div>
+
+        <div class="card shadow-sm border-0">
+            @if (viewMode == ViewMode.ByGroups)
+            {
+                <div class="accordion accordion-flush" id="accordionStudents">
                     @foreach (var g in grouppedStudents)
                     {
                         var collapseId = $"grp-{g.Key}";
-                        <tr class="table-secondary">
-                            <td colspan="4">
-                                <button class="accordion-button-collapse" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#@collapseId"
-                                        aria-expanded="false" aria-controls="@collapseId">
-                                    @groups[g.Key].Name (@g.Value.Count())
+                        <div class="accordion-item border-bottom">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed bg-light fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId">
+                                    <span class="badge bg-primary me-2">@g.Value.Count()</span> @(groups.ContainsKey(g.Key) ? groups[g.Key].Name : "Без группы")
                                 </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="4" class="p-0">
-                                <div class="collapse" id="@collapseId">
-                                    <table class="table mb-0">
-                                        <tbody>
-                                            @foreach (var student in g.Value)
-                                            {
-                                                var row = attendanceRows.FirstOrDefault(x => x.StudentId == student.Id);
-                                                <tr>
-                                                    @if(isEditing)
-                                                    {
-                                                        <td>
-                                                            <select class="form-select"
-                                                                    @bind="row.Status">
-                                                                <option value="0">не был</option>
-                                                                <option value="1">был</option>
-                                                                <option value="2">был 1 час</option>
-                                                                <option value="3">болеет</option>
-                                                            </select>
-                                                        </td>
-                                                    }
-                                                    else
-                                                    {
-                                                        <td>@row.Status</td>
-                                                    }
-
-                                                    <td>@student.Fullname</td>
-                                                    <td>@student.GroupId</td>
-                                                    <td>@student.StudentCategory?.DscountPercent ?? 0</td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
+                            </h2>
+                            <div id="@collapseId" class="accordion-collapse collapse" data-bs-parent="#accordionStudents">
+                                <div class="accordion-body p-0">
+                                    @RenderTable(g.Value)
                                 </div>
-                            </td>
-                        </tr>
+                            </div>
+                        </div>
                     }
-                </tbody>
-            </table>
-            <button class="btn btn-success" @onclick="Save">Сохранить</button>
+                </div>
+            }
+            else
+            {
+                <div class="p-0">
+                    @RenderTable(students)
+                </div>
+            }
+        </div>
     }
 </div>
 
@@ -109,6 +115,8 @@
         public int StudentId { get; set; }
         public int Status { get; set; }
     }
+    private enum ViewMode { ByGroups, All }
+    private ViewMode viewMode = ViewMode.ByGroups;
 
     private DateTime currentDate;
 
@@ -127,6 +135,7 @@
     private bool isEditing;
     private bool isLoading;
 
+
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
@@ -134,7 +143,7 @@
 
         schedules = await ScheduleService.GetAllSchedules();
         students = await StudentService.GetAllStudentsAsync();
-        var grps = await StudentService.GetAllGroupsAsync();
+        var grps = await groupService.GetAllGroupsAsync();
         groups = grps.ToDictionary(x => x.Id);
         groups.Add(-1, new Group { Id = -1, Name="<без группы>" });
 
@@ -156,8 +165,9 @@
     {
         selectedDate = date;
 
-        attendanceRows.Clear();
+        isEditing = false;
 
+        attendanceRows.Clear();
         var existsVisits = VisitService.GetVisitsByDate(date);
 
         foreach (var s in students)
@@ -187,16 +197,27 @@
 
         isLoading = true;
         //сохраняем значения в сервисе
-        foreach (var row in attendanceRows)
+        try
         {
-            //пустые значения не записываем
-            if (row.Status != 0)
+            foreach (var row in attendanceRows)
             {
-                VisitService.AddVisit(new Dtos.AddStudentVisitDto
-                    (selectedScheduleId.Value, row.StudentId, selectedDate.Value.Day, row.Status));
+                var dto = new Dtos.AddStudentVisitDto(selectedScheduleId.Value, row.StudentId, selectedDate.Value.Day, row.Status);
+                //присутствия - добавляем/обновляем
+                if (row.Status != 0)
+                {
+                    VisitService.AddOrUpdateVisit(dto);
+                }
+                //там где "не был" - удаляем
+                else
+                {
+                    VisitService.DeleteVisit(dto);
+                }
             }
         }
+        catch(Exception ex)
+        {
 
+        }
         isLoading = false;
         isEditing = false;
         StateHasChanged();
@@ -227,4 +248,80 @@
         isEditing = !isEditing;
         StateHasChanged();
     }
+
+    private void SetViewMode(ViewMode mode) => viewMode = mode;
+
+    private string GetStatusText(int status) => status switch
+    {
+        1 => "был",
+        2 => "был 1 час",
+        3 => "болеет",
+        _ => "не был"
+    };
+
+    private string GetStatusClass(int status) => status switch
+    {
+        1 => "bg-success",
+        2 => "bg-info text-dark",
+        3 => "bg-warning text-dark",
+        _ => "bg-light text-muted border"
+    };
+
+    private void HideDetailModal()
+    {
+        
+    }
+
+    //Метод для отрисовки таблицы
+    private RenderFragment RenderTable(IEnumerable<Student> students) => __builder =>
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 200px;">Отметка</th>
+                        <th>ФИО</th>
+                        @if(viewMode == ViewMode.All)
+                        {
+                            <th>Группа</th>
+                        }
+                        <th class="text-end px-4">Скидка</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var student in students)
+                    {
+                        var row = attendanceRows.FirstOrDefault(x => x.StudentId == student.Id);
+                        if (row == null) continue;
+
+                        <tr>
+                            <td>
+                                @if (isEditing)
+                                {
+                                    <select class="form-select form-select-sm border-primary" @bind="row.Status">
+                                        <option value="0">не был</option>
+                                        <option value="1">был</option>
+                                        <option value="2">был 1 час</option>
+                                        <option value="3">болеет</option>
+                                    </select>
+                                }
+                                else
+                                {
+                                    <span class="badge @GetStatusClass(row.Status)">@GetStatusText(row.Status)</span>
+                                }
+                            </td>
+                            <td class="fw-medium">@student.Fullname</td>
+                            @if(viewMode == ViewMode.All)
+                            {
+                                <td><span class="text-muted small">@student.Group?.Name</span></td>
+                            }
+                            <td class="text-end px-4">
+                                <span class="badge bg-light text-dark border">@(student.StudentCategory?.DscountPercent ?? 0)%</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    };
 }

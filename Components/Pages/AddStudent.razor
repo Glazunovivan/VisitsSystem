@@ -4,6 +4,8 @@
 @using VisitSchool.Services
 
 @inject StudentService StudentService
+@inject GroupService  groupService
+@inject DiscountCategoryService categoriesService
 @inject NavigationManager Nav
 @inject IJSRuntime JS
 
@@ -43,7 +45,7 @@
                 </select>
                 <button class="btn btn-primary"
                         @onclick="ShowAddGroupModal">
-                    Добавить группу
+                    Добавить
                 </button>
             </div>
 
@@ -55,12 +57,12 @@
                     <option value=""></option>
                     @foreach (var dc in categoriesDiscount)
                     {
-                        <option value="@dc.Id">@dc.DscountPercent</option>
+                        <option value="@dc.Id">@dc.Name (@dc.DscountPercent %)</option>
                     }
                 </select>
                 <button class="btn btn-primary"
                         @onclick="ShowAddDiscountCategoryModal">
-                    Добавить категорию
+                    Добавить
                 </button>
             </div>
             
@@ -96,10 +98,10 @@
 
     private int groupId = 0;
     private int categoryId = 0;
+    #endregion
 
     private List<Group> groups;
     private List<DiscountCategory> categoriesDiscount;
-    #endregion
 
     #region Modal
     private bool _isAddGroupVisible = false;
@@ -137,8 +139,16 @@
             categoryId = student.StudentCategoryId ?? 0;
         }
 
-        await LoadGroups();
-        await LoadDiscountCategories();
+        try
+        {
+            await LoadGroups();
+            await LoadDiscountCategories();
+        }
+        catch(Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Произошла ошибка при загрузке данных: {ex.Message}");
+            return;
+        }
     }
 
     private async Task Save()
@@ -187,13 +197,20 @@
 
     private async Task LoadGroups()
     {
-        groups = new List<Group>(2);
-        var g = await StudentService.GetAllGroupsAsync();
-        groups.AddRange(g);
+        groups = new List<Group>(5);
+        try
+        {
+            var g = await groupService.GetAllGroupsAsync();
+            groups.AddRange(g);
+        }
+        catch(Exception ex)
+        {
+
+        }
     }
 
     private async Task LoadDiscountCategories()
     {
-        categoriesDiscount = await StudentService.GetAllDiscountCategories();
+        categoriesDiscount = await categoriesService.GetAll() ?? new List<DiscountCategory>();
     }
 }

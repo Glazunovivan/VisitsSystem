@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 using VisitSchool.DataAccessLayer;
 using VisitSchool.Dtos;
 using VisitSchool.Models;
@@ -17,23 +18,38 @@ namespace VisitSchool.Repositories.SQLite
 
         public async Task AddVisit(AddStudentVisitDto visit)
         {
-            var day = _db.Schedules.First(x => x.Id == visit.ScheduleId).Days.FirstOrDefault(x=>x.Day == visit.Day);
-            var newVisit = new Visit
-            {
-                Day = visit.Day,
-                ScheduleId = visit.ScheduleId,
-                Status = visit.Status,
-                StudentId = visit.StudentId,
-                ScheduleDay = day
-            };
+            
             try
             {
+                var day = _db.Schedules.Include(x=>x.Days)
+                                       .First(x => x.Id == visit.ScheduleId)
+                                       .Days
+                                       .FirstOrDefault(x => x.Day == visit.Day);
+                var newVisit = new Visit
+                {
+                    Day = visit.Day,
+                    ScheduleId = visit.ScheduleId,
+                    Status = visit.Status,
+                    StudentId = visit.StudentId,
+                    ScheduleDay = day
+                };
+
                 await _db.Visits.AddAsync(newVisit);
                 await _db.SaveChangesAsync();   
             }
             catch (Exception ex)
             {
 
+            }
+        }
+
+        public async Task DeleteVisit(int scheduleId, int day)
+        {
+            var existVisit = await _db.Visits.FirstOrDefaultAsync(x=>x.ScheduleId == scheduleId && x.Day == day);
+            if (existVisit != null)
+            {
+                _db.Visits.Entry(existVisit).State = EntityState.Deleted;
+                await _db.SaveChangesAsync();
             }
         }
 
@@ -65,9 +81,19 @@ namespace VisitSchool.Repositories.SQLite
                                    
         }
 
-        public Task<List<Visit>> GetVisitByStudentId()
+
+        public async Task<Visit> GetVisitByStudentDate(int scheduleId, int day, int studentId)
         {
-            throw new NotImplementedException();
+            return await _db.Visits.AsNoTracking().FirstOrDefaultAsync(x=>x.ScheduleId == scheduleId && x.Day == day && x.StudentId == studentId);
+        }
+
+        public async Task<List<Visit>> GetVisitByStudentId(int id)
+        {
+            return await _db.Visits.Include(x=>x.Day)
+                                   .Include(x=>x.Student)
+                                   .Include(x=>x.Schedule)
+                                   .Where(x=>x.StudentId == id)
+                                   .ToListAsync();
         }
 
         public async Task<List<Visit>> GetVisitsByDate(DateTime dateTime)
@@ -91,6 +117,23 @@ namespace VisitSchool.Repositories.SQLite
         public Task IncludeSchedule(int scheduleId, Schedule schedule)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task UpdateStatusVisitStudent(int scheduleId, int day, int studentId, int status)
+        {
+            try
+            {
+                var visit = await _db.Visits.AsNoTracking().FirstOrDefaultAsync(x => x.ScheduleId == scheduleId && x.Day == day && x.StudentId == studentId);
+
+                visit.Status = status;
+                _db.Entry(visit).State = EntityState.Modified;
+
+                await _db.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
 
         public async Task UpdateVisitStudent(DateTime currentDateTime, DateTime newDateTime, int studentId)

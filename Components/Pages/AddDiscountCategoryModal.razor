@@ -1,7 +1,7 @@
 ﻿@using VisitSchool.Models
 @using VisitSchool.Services
 
-@inject GroupService service
+@inject DiscountCategoryService service
 
 @if (IsVisible)
 {
@@ -55,8 +55,9 @@
 
         if (!string.IsNullOrWhiteSpace(name))
         {
-            await service.AddGroup(name);
+            await service.Add(name, discount);
             name = string.Empty;
+            discount = 0;
             await OnSaved.InvokeAsync(); // Уведомляем родительский контрол, что данные сохранены
             await Close();
         }

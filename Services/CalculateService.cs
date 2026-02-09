@@ -40,7 +40,6 @@ namespace VisitSchool.Services
                 //количество "болел" - за них не платят деньги
                 int countSick = visitsStudent.Count(x => x.Status == 3);
 
-                //todo: доработать скидку
                 double discount = 0d;
                 if (s.StudentCategory == null)
                 {
@@ -56,9 +55,11 @@ namespace VisitSchool.Services
                     Cost = cost,
                     Discount = discount,
                     CostSubscription = schedule.CostSubscriptions,
-                    CountVisit = (countVisit-countSick),
+                    CountVisit = (countVisit - countSick),
                     CountMissing = countMissing,
-                    CountSick = countSick
+                    CountSick = countSick,
+                    CountDay = schedule.Days.Count,
+                    FullnameStudent = s.Fullname,
                 };
 
                 results.Add(value);

@@ -77,7 +77,7 @@ namespace VisitSchool.Repositories
             return Task.FromResult(list);
         }
 
-        public Task<List<Visit>> GetVisitByStudentId()
+        public Task<List<Visit>> GetVisitByStudentId(int id)
         {
             throw new NotImplementedException();
         }
@@ -105,6 +105,21 @@ namespace VisitSchool.Repositories
         }
 
         public Task<Visit> GetVisitByDate(DateTime dateTime)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateStatusVisitStudent(int scheduleId, int day, int studentId, int status)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteVisit(int scheduleId, int day)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Visit> GetVisitByStudentDate(int scheduleId, int day, int studentId)
         {
             throw new NotImplementedException();
         }

@@ -46,9 +46,11 @@ namespace VisitSchool
             builder.Services.AddScoped<IVisitsRepository, VisitsRepository>();
             builder.Services.AddScoped<IGroupRepository, GroupRepository>();
             builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
+            builder.Services.AddScoped<IDiscountCategoryRepository, DiscountCategories>();
 
             //services
             builder.Services.AddScoped<GroupService>();
+            builder.Services.AddScoped<DiscountCategoryService>();
             builder.Services.AddScoped<StudentService>();
             builder.Services.AddScoped<VisitService>();
             builder.Services.AddScoped<SettingsService>();

@@ -62,7 +62,7 @@ else
                         <td>@item.CountSick</td>
                         <td>@item.Discount</td>
                         <td>@item.Cost</td>
-                        <td><button class="btn">Подробнее</button></td>
+                        <td><button class="btn" @onclick="(e)=>ShowDetailModal(item)">Подробнее</button></td>
                     </tr>
                 }
             </tbody>
@@ -70,6 +70,9 @@ else
     }
 }
 
+<VisitsStudentDetailModal IsVisible="isVisibleDetail"
+                          OnClose="HideDetailModal"
+                          CostVisitStudentDto="selectedStudentDetail"/>
 
 @code {
 
@@ -80,10 +83,14 @@ else
 
     private int? selectedScheduleId = null;
     private List<CostVisitStudentDto> results;
-
     private List<Schedule> schedules;
 
-    // Метод выполняется при загрузке страницы
+
+    private CostVisitStudentDto selectedStudentDetail = null;
+
+    private bool isVisibleDetail = false;
+
+
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
@@ -108,9 +115,28 @@ else
         isLoading = true;
 
         results = new List<CostVisitStudentDto>(30);
-        results.AddRange(await serviceCalc.CalculateCostVisits(selectedScheduleId.Value));
+        try
+        {
+            results.AddRange(await serviceCalc.CalculateCostVisits(selectedScheduleId.Value));
+        }
+        catch (Exception ex)
+        {
+
+        }
 
         isLoading = false;
         StateHasChanged();
+    }
+
+    private void ShowDetailModal(CostVisitStudentDto dto)
+    {
+        selectedStudentDetail = dto;
+        isVisibleDetail = true;
+    }
+
+    private void HideDetailModal()
+    {
+        isVisibleDetail = false;
+        selectedStudentDetail = null;
     }
 }
