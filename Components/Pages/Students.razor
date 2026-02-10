@@ -26,6 +26,10 @@ else
                 @onclick="AddGroup">
             <i class="bi bi-plus-lg me-2"></i>Добавить группу
         </button>
+        <button class="btn btn-primary"
+                @onclick="AddDiscountCategory">
+            <i class="bi bi-plus-lg me-2"></i>Добавить скидки
+        </button>
 
         <div class="table-responsive">
             <table class="table table-striped table-hover table-bordered align-middle">
@@ -55,12 +59,12 @@ else
                                     <button class="btn btn-primary"
                                             title="Редактировать"
                                             @onclick="() => EditStudent(s.Id)">
-                                        <span class="bi bi-pencil" aria-hidden="true"></span>
+                                        <span class="bi bi-pencil" aria-hidden="true">Ред.</span>
                                     </button>
                                     <button class="btn btn-danger"
                                             title="Удалить"
                                             @onclick="() => ConfirmDelete(s)">
-                                        <span class="bi bi-trash" aria-hidden="true"></span>
+                                        <span class="bi bi-trash" aria-hidden="true">Уд.</span>
                                     </button>
                                 </div>
                             </td>
@@ -120,5 +124,10 @@ else
         students = await StudentService.GetAllStudentsAsync();
 
         isLoading = false;
+    }
+
+    private void AddDiscountCategory()
+    {
+        NavManager.NavigateTo($"/add-discount-category");
     }
 }
