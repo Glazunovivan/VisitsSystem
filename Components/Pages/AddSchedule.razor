@@ -26,7 +26,7 @@ else
     </div>
     <div class="col-md-8">
         <label for="scheduleName" class="form-label">Название расписания:</label>
-        <input id="scheduleName" type="text" class="form-control" @bind="scheduleName" readonly />
+        <input id="scheduleName" type="text" class="form-control" @bind="scheduleName"/>
     </div>
 
     <div class="col-md-4">
@@ -175,7 +175,7 @@ else
         {
              CostSubscriptions = costSubscriptions,
              Month = selectedMonthIndex + 1,
-             ScheduleName = months[selectedMonthIndex],
+             ScheduleName = scheduleName,
              Year = currentYear,
              Days = new List<Models.ScheduleDay>(days.Count)
         };

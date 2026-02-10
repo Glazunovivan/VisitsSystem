@@ -52,6 +52,11 @@
         /// </summary>
         public double Discount { get; set; }
 
+        /// <summary>
+        /// Название расписания
+        /// </summary>
+        public string ScheduleName { get; set; }
+
 
         public CostVisitStudentDto()
         {

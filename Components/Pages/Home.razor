@@ -89,18 +89,35 @@
                 </div>
             </div>
 
+            <!-- Карточка: Управление -->
+            <div class="col-12 col-sm-6">
+                <div class="main-card card-managment" @onclick='() => Nav.NavigateTo("/managment")'>
+                    <div class="card-content text-white">
+                        <div class="card-icon">
+                            <i class="bi bi-calculator"></i>
+                        </div>
+                        <div class="card-text">
+                            <h3>Управление</h3>
+                            <p>Добавление групп, скидок</p>
+                        </div>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Краткая сводка снизу (для красоты) -->
-    <div class="px-4 mt-5">
+   @*  <div class="px-4 mt-5">
         <div class="alert alert-light border-0 shadow-sm rounded-4 p-3 d-flex align-items-center">
             <div class="bg-primary text-white rounded-circle p-2 me-3">
                 <i class="bi bi-info-circle"></i>
             </div>
             <span class="text-muted small">Все данные синхронизированы с локальной базой данных. Последнее обновление: только что.</span>
         </div>
-    </div>
+    </div> *@
 </div>
 
 <style>
@@ -123,10 +140,10 @@
         overflow: hidden;
     }
 
-        .main-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-        }
+    .main-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
 
     .card-content {
         display: flex;
@@ -158,8 +175,6 @@
         font-size: 0.9rem;
     }
 
-    /* ЦВЕТА С ГАРАНТИЕЙ ОТОБРАЖЕНИЯ */
-
     /* Ученики - Насыщенный синий */
     .card-students {
         background: #1e3a8a !important;
@@ -180,6 +195,11 @@
 
     /* Финансы - Темный сланец */
     .card-finance {
+        background: #334155 !important;
+        background: linear-gradient(135deg, #334155 0%, #64748b 100%) !important;
+    }
+
+    .card-managment {
         background: #334155 !important;
         background: linear-gradient(135deg, #334155 0%, #64748b 100%) !important;
     }

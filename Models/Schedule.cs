@@ -10,7 +10,7 @@
         public int Year { get; set; }
 
         /// <summary>
-        /// Название месяца
+        /// Название расписания
         /// </summary>
         public string ScheduleName { get; set; }
 

@@ -41,9 +41,9 @@ namespace VisitSchool.Services
                 int countSick = visitsStudent.Count(x => x.Status == 3);
 
                 double discount = 0d;
-                if (s.StudentCategory == null)
+                if (s.StudentCategory != null)
                 {
-                    discount = s.StudentCategory?.DscountPercent ?? 0;
+                    discount = (s.StudentCategory?.DscountPercent ?? 0) / 100;
                 }
 
                 decimal cost = (schedule.CostSubscriptionsPerDay * (countMissing + countVisitStatus12)) * (decimal)(1-discount);
@@ -60,6 +60,7 @@ namespace VisitSchool.Services
                     CountSick = countSick,
                     CountDay = schedule.Days.Count,
                     FullnameStudent = s.Fullname,
+                    ScheduleName = schedule.ScheduleName
                 };
 
                 results.Add(value);

@@ -31,7 +31,10 @@ namespace VisitSchool.Repositories.SQLite
 
         public async Task<List<Student>> GetAllAsync()
         {
-            return await _dpContext.Students.AsNoTracking().ToListAsync();
+            return await _dpContext.Students.AsNoTracking()
+                                            .Include(x=>x.Group)
+                                            .Include(x=>x.StudentCategory)
+                                            .ToListAsync();
         }
 
         public async Task<Student> GetByIdAsync(int id)
