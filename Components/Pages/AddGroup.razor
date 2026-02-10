@@ -13,6 +13,8 @@
             <label class="form-label">Название группы</label>
             <input class="form-control" @bind="name" />
         </div>
+
+        <button class="btn btn-primary w-100" @onclick="AddGroupEntity">Сохранить</button>
     </div>
 </div>
 
@@ -28,8 +30,15 @@
 
     private async Task AddGroupEntity()
     {
-        await service.AddGroup(name);
+        try
+        {
+            await service.AddGroup(name);
+            name = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            
+        }
 
-        name = string.Empty;
     }
 }
