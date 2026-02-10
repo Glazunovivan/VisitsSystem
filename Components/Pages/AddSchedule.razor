@@ -115,7 +115,8 @@ else
             costSubscriptions = loadedSchedule.CostSubscriptions;
             selectedMonthIndex = loadedSchedule.Month-1;
 
-            scheduleName = $"{months[selectedMonthIndex]} {loadedSchedule.Year}";
+            scheduleName = string.IsNullOrEmpty(loadedSchedule.ScheduleName) ? $"{months[selectedMonthIndex]} {loadedSchedule.Year}" 
+                                                                             : loadedSchedule.ScheduleName;
 
             int daysInMonth = DateTime.DaysInMonth(loadedSchedule.Year, loadedSchedule.Month);
             List<DateTime> allDays = new List<DateTime>();
