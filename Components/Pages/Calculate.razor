@@ -1,8 +1,8 @@
 ﻿@page "/calculate"
 
-@using VisitSchool.Dtos
-@using VisitSchool.Models
-@using VisitSchool.Services
+@using VisitsApp.Core.Dtos
+@using VisitsApp.Core.Models
+@using VisitsApp.Core.Services
 
 @inject CalculateService serviceCalc
 @inject ScheduleService serviceSchedules
@@ -82,8 +82,8 @@ else
     private DateTime? endDate;
 
     private int? selectedScheduleId = null;
-    private List<CostVisitStudentDto> results;
-    private List<Schedule> schedules;
+    private List<VisitsApp.Core.Dtos.CostVisitStudentDto> results;
+    private List<VisitsApp.Core.Models.Schedule> schedules;
 
 
     private CostVisitStudentDto selectedStudentDetail = null;

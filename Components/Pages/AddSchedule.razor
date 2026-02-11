@@ -1,7 +1,7 @@
 ﻿@page "/add-schedule/{id:int?}"
 
 
-@inject VisitSchool.Services.ScheduleService service;
+@inject VisitsApp.Core.Services.ScheduleService service;
 
 @if (Id != null)
 {
@@ -172,17 +172,17 @@ else
         }
 
         var days = SelectedDays.Select(x=>x.Day).ToList();
-        var schedule = new VisitSchool.Models.Schedule
+        var schedule = new VisitsApp.Core.Models.Schedule
         {
              CostSubscriptions = costSubscriptions,
              Month = selectedMonthIndex + 1,
              ScheduleName = scheduleName,
              Year = currentYear,
-             Days = new List<Models.ScheduleDay>(days.Count)
+                Days = new List<VisitsApp.Core.Models.ScheduleDay>(days.Count)
         };
         foreach (var d in days)
         {
-            schedule.Days.Add(new Models.ScheduleDay{ Schedule = schedule, Day = d });
+            schedule.Days.Add(new VisitsApp.Core.Models.ScheduleDay { Schedule = schedule, Day = d });
         }
 
         if (Id != null)

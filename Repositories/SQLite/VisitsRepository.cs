@@ -2,8 +2,9 @@
 using System;
 using System.Linq;
 using VisitSchool.DataAccessLayer;
-using VisitSchool.Dtos;
-using VisitSchool.Models;
+using VisitsApp.Core.Dtos;
+using VisitsApp.Core.Models;
+using VisitsApp.Core.Repositories;
 
 namespace VisitSchool.Repositories.SQLite
 {

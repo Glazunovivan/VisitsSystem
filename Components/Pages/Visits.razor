@@ -1,7 +1,7 @@
 ﻿@page "/visits"
 
-@using VisitSchool.Models
-@using VisitSchool.Services
+@using VisitsApp.Core.Models
+@using VisitsApp.Core.Services
 @using System.Globalization
 
 @inject StudentService StudentService
@@ -201,7 +201,7 @@
         {
             foreach (var row in attendanceRows)
             {
-                var dto = new Dtos.AddStudentVisitDto(selectedScheduleId.Value, row.StudentId, selectedDate.Value.Day, row.Status);
+                var dto = new VisitsApp.Core.Dtos.AddStudentVisitDto(selectedScheduleId.Value, row.StudentId, selectedDate.Value.Day, row.Status);
                 //присутствия - добавляем/обновляем
                 if (row.Status != 0)
                 {

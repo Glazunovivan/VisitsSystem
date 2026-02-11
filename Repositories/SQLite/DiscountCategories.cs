@@ -1,11 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using VisitsApp.Core.Repositories;
 using VisitSchool.DataAccessLayer;
-using VisitSchool.Models;
+using VisitsApp.Core.Models;
 
 namespace VisitSchool.Repositories.SQLite
 {

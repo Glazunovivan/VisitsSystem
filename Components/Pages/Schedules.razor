@@ -1,9 +1,10 @@
 ﻿@page "/schedules"
-@using VisitSchool.Models
+@using VisitsApp.Core.Models
+@using VisitsApp.Core.Services
 
 
 @inject NavigationManager NavManager
-@inject VisitSchool.Services.ScheduleService service;
+@inject ScheduleService service;
 
 <div class="container d-inline-flex justify-content-md-start">
     <div class="d-flex align-items-center">

@@ -5,6 +5,8 @@ VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisitSchool", "VisitSchool.csproj", "{5120B2C5-E124-482A-B3DA-A411317108D8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisitsApp.Core", "..\VisitsApp.Core\VisitsApp.Core.csproj", "{11E1D2B7-BC23-4B08-988F-A603F38E9BDA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,12 @@ Global
 		{5120B2C5-E124-482A-B3DA-A411317108D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5120B2C5-E124-482A-B3DA-A411317108D8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5120B2C5-E124-482A-B3DA-A411317108D8}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{11E1D2B7-BC23-4B08-988F-A603F38E9BDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11E1D2B7-BC23-4B08-988F-A603F38E9BDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11E1D2B7-BC23-4B08-988F-A603F38E9BDA}.MigrationDb|Any CPU.ActiveCfg = Debug|Any CPU
+		{11E1D2B7-BC23-4B08-988F-A603F38E9BDA}.MigrationDb|Any CPU.Build.0 = Debug|Any CPU
+		{11E1D2B7-BC23-4B08-988F-A603F38E9BDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11E1D2B7-BC23-4B08-988F-A603F38E9BDA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using VisitSchool.Models;
+using VisitsApp.Core.Models;
 
 namespace VisitSchool.DataAccessLayer
 {

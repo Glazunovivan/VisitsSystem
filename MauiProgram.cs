@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
+using VisitsApp.Core.Repositories;
+using VisitsApp.Core.Services;
 using VisitSchool.DataAccessLayer;
-using VisitSchool.Repositories;
 using VisitSchool.Repositories.SQLite;
 using VisitSchool.Services;
 
