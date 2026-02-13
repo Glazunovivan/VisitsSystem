@@ -49,9 +49,15 @@
 
         <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
         <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+        <Compile Remove="Dtos\**" />
+        <Content Remove="Dtos\**" />
+        <EmbeddedResource Remove="Dtos\**" />
+        <MauiXaml Remove="Dtos\**" />
+        <None Remove="Dtos\**" />
         <None Remove=".gitattributes" />
         <None Remove=".gitignore" />
-			<MauiAsset Include="Resources\Raw\appsetings.json" />
+        <None Remove="appsetings.txt" />
+			<MauiAsset Include="appsetings.txt" />
 		
     </ItemGroup>
    
@@ -72,6 +78,16 @@
 
     <ItemGroup>
       <ProjectReference Include="..\VisitsApp.Core\VisitsApp.Core.csproj" />
+    </ItemGroup>
+   
+
+    <ItemGroup>
+      <PRIResource Remove="Dtos\**" />
+    </ItemGroup>
+   
+
+    <ItemGroup>
+      <Content Include="appsetings.txt" />
     </ItemGroup>
 
 </Project>

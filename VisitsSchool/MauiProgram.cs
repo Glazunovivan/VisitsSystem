@@ -22,7 +22,7 @@ namespace VisitSchool
                 });
 
             var assembly = Assembly.GetExecutingAssembly();
-            using var stream = FileSystem.OpenAppPackageFileAsync("appsetings.json").Result;
+            using var stream = FileSystem.OpenAppPackageFileAsync("appsetings.txt").Result;
 
             // Создаем конфигурацию
             var config = new ConfigurationBuilder()
