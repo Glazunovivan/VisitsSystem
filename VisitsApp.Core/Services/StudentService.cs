@@ -32,7 +32,7 @@ namespace VisitsApp.Core.Services
             var s = new Student
             {
                 Name = name,
-                Surename = surename,
+                Surename = surename ?? "",
                 Lastname = lastname,
                 GroupId = groupId == 0 ? null : groupId,  
                 StudentCategoryId = categoryId == 0 ? null : categoryId

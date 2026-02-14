@@ -20,18 +20,18 @@
         {
             <h5 class="card-title">Редактирование информации об ученике</h5>
         }
-        
+
+        <div class="mb-2">
+            <label class="form-label">Фамилия</label>
+            <input class="form-control" @bind="lastname" />
+        </div>
         <div class="mb-2">
             <label class="form-label">Имя</label>
             <input class="form-control" @bind="name"/>
         </div>
         <div class="mb-2">
-            <label class="form-label">Фамилия</label>
-            <input class="form-control" rows="3" @bind="lastname"/>
-        </div>
-        <div class="mb-2">
             <label class="form-label">Отчество</label>
-            <input class="form-control" rows="3" @bind="surename"/>
+            <input class="form-control" @bind="surename"/>
         </div>
         <div class="mb-2">
             <label class="form-label">Группа</label>
@@ -146,7 +146,7 @@
         }
         catch(Exception ex)
         {
-            await JS.InvokeVoidAsync("alert", $"Произошла ошибка при загрузке данных: {ex.Message}");
+            await JS.InvokeVoidAsync("alert", $"Произошла ошибка при загрузке данных: {ex.Message}. Inner Exception: {ex.InnerException?.Message}");
             return;
         }
     }
@@ -187,7 +187,7 @@
         }
         catch (Exception ex)
         {
-            await JS.InvokeVoidAsync("alert", $"Ошибка: {ex.Message}");
+            await JS.InvokeVoidAsync("alert", $"Ошибка: {ex.Message}. Inner Exception: {ex.InnerException?.Message}");
         }
         finally
         {

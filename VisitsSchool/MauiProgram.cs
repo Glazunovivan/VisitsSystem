@@ -39,25 +39,31 @@ namespace VisitSchool
     		builder.Logging.AddDebug();
 #endif
 
-            //dbcontext
-            builder.Services.AddDbContext<ApplicationContext>();
+            try
+            {
+                //dbcontext
+                builder.Services.AddDbContext<ApplicationContext>();
 
-            //repositories
-            builder.Services.AddScoped<IStudentRepository, StudentsRepository>();
-            builder.Services.AddScoped<IVisitsRepository, VisitsRepository>();
-            builder.Services.AddScoped<IGroupRepository, GroupRepository>();
-            builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
-            builder.Services.AddScoped<IDiscountCategoryRepository, DiscountCategories>();
+                //repositories
+                builder.Services.AddScoped<IStudentRepository, StudentsRepository>();
+                builder.Services.AddScoped<IVisitsRepository, VisitsRepository>();
+                builder.Services.AddScoped<IGroupRepository, GroupRepository>();
+                builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
+                builder.Services.AddScoped<IDiscountCategoryRepository, DiscountCategories>();
 
-            //services
-            builder.Services.AddScoped<GroupService>();
-            builder.Services.AddScoped<DiscountCategoryService>();
-            builder.Services.AddScoped<StudentService>();
-            builder.Services.AddScoped<VisitService>();
-            builder.Services.AddScoped<SettingsService>();
-            builder.Services.AddScoped<CalculateService>();
-            builder.Services.AddScoped<ScheduleService>();
-
+                //services
+                builder.Services.AddScoped<GroupService>();
+                builder.Services.AddScoped<DiscountCategoryService>();
+                builder.Services.AddScoped<StudentService>();
+                builder.Services.AddScoped<VisitService>();
+                builder.Services.AddScoped<SettingsService>();
+                builder.Services.AddScoped<CalculateService>();
+                builder.Services.AddScoped<ScheduleService>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message + ex.InnerException?.Message);
+            }
 
             return builder.Build();
         }

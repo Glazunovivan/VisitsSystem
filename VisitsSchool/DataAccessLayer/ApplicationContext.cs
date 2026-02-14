@@ -8,6 +8,8 @@ namespace VisitSchool.DataAccessLayer
     {
         private readonly IConfiguration _configuration;
 
+        public string DbPath { get; private set; }
+
         /// <summary>
         /// Ученики
         /// </summary>
@@ -50,9 +52,10 @@ namespace VisitSchool.DataAccessLayer
         {
 #if !MIGRATIONDB
             var pathDbConfig = _configuration.GetConnectionString("DefaultConnection");
-            var dbPath = Path.Combine(FileSystem.AppDataDirectory, pathDbConfig);
+            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "visits.db");
 
-            optionsBuilder.UseSqlite($"Filename = {dbPath}");
+            optionsBuilder.UseSqlite($"Filename={dbPath}");
+            DbPath = dbPath;
 #endif
 
 #if MIGRATIONDB

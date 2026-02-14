@@ -2,17 +2,33 @@
 
 @namespace VisitSchool.Services
 @inject SettingsService service
+@inject IJSRuntime JS
 
 <h3>Настройки</h3>
 
 <h2>@service.GetVersionApp()</h2>
-<button class="btn btn-danger">Очистить данные</button>
+<div>
+    <h2>Путь к БД:</h2>
+    <h2>@service.GetDbPath()</h2>
+</div>
+<button class="btn btn-danger" @onclick="OnDeleteDbData">Очистить данные</button>
 
 @code 
 {
 
     private async Task OnDeleteDbData()
     {
-        
+        try
+        {
+            var result = await service.ClearDataBase();
+            if (result == true)
+            {
+                await JS.InvokeVoidAsync("alert", "База данных успешно очищена!");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Произошла ошибка при очистке базы данных: {ex.Message}. Inner Exception: {ex.InnerException?.Message}");
+        }
     }
 }
