@@ -1,4 +1,5 @@
-﻿using VisitsApp.Core.Models;
+﻿using Microsoft.Extensions.Logging;
+using VisitsApp.Core.Models;
 using VisitsApp.Core.Repositories;
 
 namespace VisitsApp.Core.Services
@@ -6,10 +7,12 @@ namespace VisitsApp.Core.Services
     public class GroupService
     {
         private readonly IGroupRepository _repo;
+        private readonly ILogger<GroupService> _logger;
 
-        public GroupService(IGroupRepository repo)
+        public GroupService(IGroupRepository repo, ILogger<GroupService> logger)
         {
             _repo = repo;   
+            _logger = logger;
         }
 
         /// <summary>
@@ -18,7 +21,16 @@ namespace VisitsApp.Core.Services
         /// <returns></returns>
         public async Task<List<Group>> GetAllGroupsAsync()
         {
-            return await _repo.GetAllGroupsAsync();
+            try
+            {
+                return await _repo.GetAllGroupsAsync();
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw ex;
+            }
         }
 
         /// <summary>
@@ -27,12 +39,28 @@ namespace VisitsApp.Core.Services
         /// <returns></returns>
         public Task AddGroup(string name)
         {
-            return _repo.Add(name);
+            try
+            {
+                return _repo.Add(name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw ex;   
+            }
         }
 
         public async Task Delete(int id)
         {
-            await _repo.Delete(id);
+            try
+            {
+                await _repo.Delete(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw ex;   
+            }
         }
     }
 }

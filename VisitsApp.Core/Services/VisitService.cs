@@ -1,4 +1,5 @@
-﻿using VisitsApp.Core.Dtos;
+﻿using Microsoft.Extensions.Logging;
+using VisitsApp.Core.Dtos;
 using VisitsApp.Core.Models;
 using VisitsApp.Core.Repositories;
 
@@ -6,13 +7,15 @@ namespace VisitsApp.Core.Services
 {
     public class VisitService
     {
+        private readonly ILogger<VisitService> _logger;
         private readonly IVisitsRepository _visitsRepo;
         private readonly IScheduleRepository _scheduleRepo;
         
-        public VisitService(IVisitsRepository visitsRepo, IScheduleRepository scheduleRepository) 
+        public VisitService(IVisitsRepository visitsRepo, IScheduleRepository scheduleRepository, ILogger<VisitService> logger) 
         { 
             _visitsRepo = visitsRepo;
             _scheduleRepo = scheduleRepository;
+            _logger = logger;
         }
 
         /// <summary>
@@ -21,15 +24,44 @@ namespace VisitsApp.Core.Services
         /// <param name="date"></param>
         public async Task AddOrUpdateVisit(AddStudentVisitDto visit)
         {
-            var existVisits = await _visitsRepo.GetVisitByStudentDate(visit.ScheduleId, visit.Day, visit.StudentId);
+            Visit existVisits = null;
+            try
+            {
+                _logger.LogInformation($"Поиск существующего посещения ScheduleId={visit.ScheduleId} Day={visit.Day} StudentId={visit.StudentId}");
+
+                existVisits = await _visitsRepo.GetVisitByStudentDate(visit.ScheduleId, visit.Day, visit.StudentId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message}. Inner Exception {ex.InnerException?.Message}");
+                throw ex;
+            }
            
             if (existVisits != null)
             {
-                await _visitsRepo.UpdateStatusVisitStudent(visit.ScheduleId, visit.Day, visit.StudentId, visit.Status);
+                try
+                {
+                    _logger.LogInformation("Обновляем посещение...");
+                    await _visitsRepo.UpdateStatusVisitStudent(visit.ScheduleId, visit.Day, visit.StudentId, visit.Status);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"{ex.Message}. Inner Exception {ex.InnerException?.Message}");
+                    throw ex;
+                }
             }
             else
             {
-                await _visitsRepo.AddVisit(visit);
+                try
+                {
+                    _logger.LogInformation("Add новое посещение");
+                    await _visitsRepo.AddVisit(visit);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"{ex.Message}. Inner Exception {ex.InnerException?.Message}");
+                    throw ex;
+                }
             }
         }
 
@@ -37,11 +69,13 @@ namespace VisitsApp.Core.Services
         {
             try
             {
+                _logger.LogInformation($"Удаляем посещение ScheduleId={visit.ScheduleId}, Day = {visit.Day}");
                 await _visitsRepo.DeleteVisit(visit.ScheduleId, visit.Day);
             }
             catch (Exception ex)
             {
-
+                _logger.LogError($"{ex.Message}. Inner Exception {ex.InnerException?.Message}");
+                throw ex;
             }
         }
 
@@ -52,7 +86,15 @@ namespace VisitsApp.Core.Services
         /// <returns></returns>
         public List<Visit> GetVisitsByScheduleId(int scheduleId)
         {
-            return _visitsRepo.GetVisitsByScheduleId(scheduleId).Result;
+            try
+            {
+                return _visitsRepo.GetVisitsByScheduleId(scheduleId).Result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message}. Inner Exception {ex.InnerException?.Message}", "Не удалось получить список посещений");
+                throw ex;
+            }
         }
 
         /// <summary>
@@ -62,17 +104,25 @@ namespace VisitsApp.Core.Services
         /// <returns></returns>
         public List<Visit> GetVisitsByDate(DateTime dateTime)
         {
-            var schedule = _scheduleRepo.Get(dateTime.Year, dateTime.Month).Result;
-            
-            if (_scheduleRepo is InMemoryScheduleRepository)
+            try
             {
-                _visitsRepo.IncludeSchedule(schedule.Id, schedule);
+                var schedule = _scheduleRepo.Get(dateTime.Year, dateTime.Month).Result;
+
+                if (_scheduleRepo is InMemoryScheduleRepository)
+                {
+                    _visitsRepo.IncludeSchedule(schedule.Id, schedule);
+                }
+
+                var visits = _visitsRepo.GetVisitsByDate(dateTime).Result;
+
+                return visits;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message}. Inner Exception {ex.InnerException?.Message}", "Не удалось получить список посещений по дате");
+                throw ex;
             }
 
-            var visits = _visitsRepo.GetVisitsByDate(dateTime).Result;
-            
-
-            return visits;
         }
 
         /// <summary>
@@ -82,7 +132,14 @@ namespace VisitsApp.Core.Services
         /// <param name="studentId"></param>
         public void UpdateVisit(DateTime currentDateTime, DateTime newDateTime, int studentId)
         {
-            _visitsRepo.UpdateVisitStudent(currentDateTime, newDateTime, studentId);
+            try
+            {
+                _visitsRepo.UpdateVisitStudent(currentDateTime, newDateTime, studentId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message}. Inner Exception {ex.InnerException?.Message}. {currentDateTime}, {newDateTime}, {studentId}", "Не удалось обновить посещение");
+            }
         }
     }
 }

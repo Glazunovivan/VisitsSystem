@@ -7,17 +7,17 @@
         /// <summary>
         /// Имя
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         
         /// <summary>
         /// Отчество
         /// </summary>
-        public string Surename { get; set; }
+        public string Surename { get; set; } = string.Empty;
 
         /// <summary>
         /// Фамиля
         /// </summary>
-        public string Lastname { get; set; }
+        public string Lastname { get; set; } = string.Empty;
 
         /// <summary>
         /// Дата добавления в систему

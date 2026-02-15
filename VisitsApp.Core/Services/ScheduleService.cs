@@ -1,4 +1,5 @@
-﻿using VisitsApp.Core.Models;
+﻿using Microsoft.Extensions.Logging;
+using VisitsApp.Core.Models;
 using VisitsApp.Core.Repositories;
 
 namespace VisitsApp.Core.Services
@@ -6,10 +7,12 @@ namespace VisitsApp.Core.Services
     public class ScheduleService
     {
         private readonly IScheduleRepository _repo;
+        private readonly ILogger<ScheduleService> _logger;
 
-        public ScheduleService(IScheduleRepository repo)
+        public ScheduleService(IScheduleRepository repo, ILogger<ScheduleService> logger)
         {
-            _repo = repo;    
+            _repo = repo;  
+            _logger = logger;
         }
 
         /// <summary>
@@ -18,7 +21,15 @@ namespace VisitsApp.Core.Services
         /// <returns></returns>
         public async Task AddSchedule(Schedule schedule)
         {
-            await _repo.Add(schedule);
+            try
+            {
+                await _repo.Add(schedule);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw ex;
+            }
         }
 
         /// <summary>
@@ -27,17 +38,41 @@ namespace VisitsApp.Core.Services
         /// <returns></returns>
         public async Task UpdateShedule(Schedule schedule)
         {
-            await _repo.UpdateSchedule(schedule);   
+            try
+            {
+                await _repo.UpdateSchedule(schedule);   
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw ex;
+            }
         }
 
         public async Task<List<Schedule>> GetAllSchedules()
         {
-            return await _repo.GetAll();
+            try
+            {
+               return await _repo.GetAll();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw ex;
+            }
         }
 
         public Task<Schedule> GetSchedule(int scheduleId)
         {
-            return _repo.Get(scheduleId);
+            try
+            {
+                return _repo.Get(scheduleId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw ex;
+            }
         }
     }
 }

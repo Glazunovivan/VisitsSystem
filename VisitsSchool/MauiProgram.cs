@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using System.Reflection;
 using VisitsApp.Core.Repositories;
 using VisitsApp.Core.Services;
@@ -41,6 +42,22 @@ namespace VisitSchool
 
             try
             {
+
+                var logPath = Path.Combine(FileSystem.AppDataDirectory, "logs", "log-.txt");
+                //настройка serilog
+                Log.Logger = new LoggerConfiguration()
+                                .Enrich.FromLogContext()    //контекст
+                                .Enrich.WithProperty("Application", "VisitSchool")
+                                .MinimumLevel.Debug()
+                                .WriteTo.File(logPath,
+                                              rollingInterval: RollingInterval.Day,
+                                              retainedFileCountLimit: 7,
+                                              outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+                                .CreateLogger();
+
+                builder.Logging.AddSerilog(dispose: true);
+
+                builder.Services.AddSingleton(new LogFileInfo(logPath));
                 //dbcontext
                 builder.Services.AddDbContext<ApplicationContext>();
 

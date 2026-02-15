@@ -1,8 +1,12 @@
 ﻿@page "/add-student/{id:int?}"
 
+@using Microsoft.Extensions.Logging
 @using VisitsApp.Core.Models
 @using VisitsApp.Core.Services
 
+@inject ILogger<StudentService> _loggerStudentService; 
+@inject ILogger<GroupService> _loggerGroupService;
+@inject ILogger<DiscountCategoryService> _loggerDiscountCategoryService;
 @inject StudentService StudentService
 @inject GroupService  groupService
 @inject DiscountCategoryService categoriesService
@@ -128,26 +132,29 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if(Id != null)
-        {
-            var student = await StudentService.Get(Id.Value);
-
-            name = student.Name;
-            surename = student.Surename;
-            lastname = student.Lastname;
-            groupId = student.GroupId ?? 0;
-            categoryId = student.StudentCategoryId ?? 0;
-        }
-
         try
         {
+            if(Id != null)
+            {
+                _loggerStudentService.LogInformation($"Загрузка информации о существующем ученике {Id}...");
+                var student = await StudentService.Get(Id.Value);
+
+                name = student.Name;
+                surename = student.Surename;
+                lastname = student.Lastname;
+                groupId = student.GroupId ?? 0;
+                categoryId = student.StudentCategoryId ?? 0;
+                
+                _loggerStudentService.LogInformation($"Информация об ученике загружена: {name}, {surename}, {lastname}, {groupId}, {categoryId}");
+            }
+
             await LoadGroups();
             await LoadDiscountCategories();
         }
         catch(Exception ex)
         {
+            _loggerStudentService.LogError($"{ex.Message}. Inner Exception: {ex.InnerException?.Message}", "Ошибка при загрузке страницы ученика");
             await JS.InvokeVoidAsync("alert", $"Произошла ошибка при загрузке данных: {ex.Message}. Inner Exception: {ex.InnerException?.Message}");
-            return;
         }
     }
 
@@ -179,6 +186,7 @@
                 await JS.InvokeVoidAsync("alert", "Ученик добавлен");
             }
 
+            _loggerStudentService.LogInformation("Ученик добавлен");
             name = string.Empty;
             lastname = string.Empty;
             surename = string.Empty;
@@ -188,6 +196,7 @@
         catch (Exception ex)
         {
             await JS.InvokeVoidAsync("alert", $"Ошибка: {ex.Message}. Inner Exception: {ex.InnerException?.Message}");
+            _loggerStudentService.LogError($"{ex.Message}. {ex.InnerException?.Message}");
         }
         finally
         {
@@ -205,12 +214,19 @@
         }
         catch(Exception ex)
         {
-
+            _loggerGroupService.LogError($"{ex.Message}. Inner Exception {ex.InnerException?.Message}", "Ошибка при загрузке списка групп");
         }
     }
 
     private async Task LoadDiscountCategories()
     {
-        categoriesDiscount = await categoriesService.GetAll() ?? new List<DiscountCategory>();
+        try
+        {
+            categoriesDiscount = await categoriesService.GetAll() ?? new List<DiscountCategory>();
+        }
+        catch (Exception ex)
+        {
+            _loggerDiscountCategoryService.LogError($"{ex.Message}. Inner Exception {ex.InnerException?.Message}", "Ошибка при загрузке списка скидок");
+        }
     }
 }

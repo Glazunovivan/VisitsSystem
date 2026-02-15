@@ -1,4 +1,5 @@
-﻿using VisitsApp.Core.Models;
+﻿using Microsoft.Extensions.Logging;
+using VisitsApp.Core.Models;
 using VisitsApp.Core.Repositories;
 
 namespace VisitsApp.Core.Services
@@ -7,11 +8,13 @@ namespace VisitsApp.Core.Services
     {
         private readonly IStudentRepository _repo;
         private readonly GroupService _groupService;
+        private readonly ILogger _logger;
 
-        public StudentService(IStudentRepository repository, GroupService groupService) 
+        public StudentService(IStudentRepository repository, GroupService groupService, ILogger<StudentService> logger) 
         {
             _repo = repository;
             _groupService = groupService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -21,24 +24,45 @@ namespace VisitsApp.Core.Services
         /// <returns></returns>
         public async Task<Student> Get(int id)
         {
-            return await _repo.GetByIdAsync(id);
+            try
+            {
+                return await _repo.GetByIdAsync(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message}. Inner Exception {ex.InnerException?.Message}", "Ошибка при получении данных из БД.");
+                throw ex;
+            }
         }
 
         public async Task<Student> AddStudentAsync(string name, string surename, string lastname, int groupId, int categoryId)
         {
             if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(lastname))
-                throw new ArgumentNullException("Имя и фамилия не должны быть пустыми");
-
-            var s = new Student
             {
-                Name = name,
-                Surename = surename ?? "",
-                Lastname = lastname,
-                GroupId = groupId == 0 ? null : groupId,  
-                StudentCategoryId = categoryId == 0 ? null : categoryId
-            };
+                _logger.LogInformation("Имя и фамилия не должны быть пустыми", "Ошибка при попытке сохранить данные об ученике");
+                throw new ArgumentNullException("Имя и фамилия не должны быть пустыми");
+            }
 
-            return await _repo.AddAsync(s);
+            try
+            {
+                _logger.LogInformation($"Сохранение ученика в БД: {name}, {surename}, {lastname}, {groupId}, {categoryId}");
+                var s = new Student
+                {
+                    Name = name,
+                    Surename = surename ?? "",
+                    Lastname = lastname,
+                    GroupId = groupId == 0 ? null : groupId,
+                    StudentCategoryId = categoryId == 0 ? null : categoryId
+                };
+
+                return await _repo.AddAsync(s);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message}. Inner Exception: {ex.InnerException?.Message}");
+                throw ex;
+            }
+           
         }
    
         /// <summary>
@@ -60,11 +84,19 @@ namespace VisitsApp.Core.Services
             {
                 student.Surename = surename;
             }
+
             student.GroupId = groupId == 0 ? null : groupId;
-            student.StudentCategoryId = categoryId == 0 ? null : categoryId; 
+            student.StudentCategoryId = categoryId == 0 ? null : categoryId;
 
-            await _repo.UpdateAsync(student);
-
+            try 
+            { 
+                await _repo.UpdateAsync(student);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message}. Inner Exception: {ex.InnerException?.Message}");
+                throw ex;
+            }
         }
 
         public async Task<List<Student>> GetAllStudentsAsync()
@@ -76,16 +108,25 @@ namespace VisitsApp.Core.Services
             }
             catch (Exception ex)
             {
-
+                _logger.LogError($"{ex.Message}. Inner Exception: {ex.InnerException?.Message}");
             }
-            
+
             return result;   
         }
 
 
         public async Task DeleteStudent(int id)
         {
-            await _repo.DeleteAsync(id);
+            try
+            {
+                _logger.LogInformation($"Удаление ученика с Id = {id}...");
+                await _repo.DeleteAsync(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message}. Inner Exception: {ex.InnerException?.Message}");
+                throw ex;
+            }
         }
     }
 }
