@@ -184,14 +184,14 @@
             {
                 await StudentService.AddStudentAsync(name, surename, lastname, groupId, categoryId);
                 await JS.InvokeVoidAsync("alert", "Ученик добавлен");
-            }
 
-            _loggerStudentService.LogInformation("Ученик добавлен");
-            name = string.Empty;
-            lastname = string.Empty;
-            surename = string.Empty;
-            groupId = 0;
-            categoryId = 0;
+                _loggerStudentService.LogInformation("Ученик добавлен");
+                name = string.Empty;
+                lastname = string.Empty;
+                surename = string.Empty;
+                groupId = 0;
+                categoryId = 0;
+            }
         }
         catch (Exception ex)
         {

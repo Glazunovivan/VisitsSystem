@@ -1,8 +1,10 @@
 ﻿@page "/schedules"
+@using Microsoft.Extensions.Logging
 @using VisitsApp.Core.Models
 @using VisitsApp.Core.Services
 
 
+@inject ILogger<ScheduleService> Logger;
 @inject NavigationManager NavManager
 @inject ScheduleService service;
 
@@ -45,7 +47,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        schedules = await service.GetAllSchedules();
+        try
+        {
+            schedules = await service.GetAllSchedules();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex.Message);
+        }
     }
 
     private void CreateSchedule()

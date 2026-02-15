@@ -1,6 +1,9 @@
-﻿@using VisitsApp.Core.Models
+﻿@using Microsoft.Extensions.Logging
+@using VisitsApp.Core.Models
 @using VisitsApp.Core.Services
 
+
+@inject ILogger<DiscountCategoryService> Logger;
 @inject DiscountCategoryService service
 
 @if (IsVisible)
@@ -53,14 +56,22 @@
             return;
         }
 
-        if (!string.IsNullOrWhiteSpace(name))
+        try
         {
-            await service.Add(name, discount);
-            name = string.Empty;
-            discount = 0;
-            await OnSaved.InvokeAsync(); // Уведомляем родительский контрол, что данные сохранены
-            await Close();
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                await service.Add(name, discount);
+                name = string.Empty;
+                discount = 0;
+                await OnSaved.InvokeAsync(); // Уведомляем родительский контрол, что данные сохранены
+                await Close();
+            }
         }
+        catch (Exception ex)
+        {
+            Logger.LogError($"{ex.Message}. {ex.InnerException.Message}");
+        }
+
     }
 
     private async Task Close()

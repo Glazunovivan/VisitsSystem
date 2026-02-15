@@ -1,7 +1,9 @@
 ﻿@page "/add-discount-category"
 
+@using Microsoft.Extensions.Logging
 @using VisitsApp.Core.Services
 
+@inject ILogger<DiscountCategoryService> Logger;
 @inject DiscountCategoryService service;
 
 <div class="container">
@@ -28,12 +30,20 @@
 
     private async Task Save()
     {
+
         if (string.IsNullOrWhiteSpace(name) || discount <= 0)
         {
             return;
         }
 
-        await service.Add(name, discount);
+        try
+        {
+            await service.Add(name, discount);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError($"{ex.Message}. {ex.InnerException?.Message}");
+        }
     }
 
 }
