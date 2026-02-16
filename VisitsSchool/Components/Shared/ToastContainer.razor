@@ -1,0 +1,58 @@
+﻿@using System.Timers
+@using VisitsApp.Core.Services
+
+@inject ToastService ToastService
+@implements IDisposable
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
+    @foreach (var toast in _activeToasts.ToList())
+    {
+        <div class="toast show shadow" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header @(toast.Level == ToastLevel.Success ? "bg-success" : "bg-danger") text-white">
+                <i class="bi @(toast.Level == ToastLevel.Success ? "bi-check-circle" : "bi-exclamation-triangle") me-2"></i>
+                <strong class="me-auto">@toast.Title</strong>
+                <button type="button" class="btn-close btn-close-white" @onclick="() => RemoveToast(toast)"></button>
+            </div>
+            <div class="toast-body bg-white">
+                @toast.Message
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<ToastModel> _activeToasts = new();
+
+    protected override void OnInitialized()
+    {
+        ToastService.OnShow += HandleShow;
+    }
+
+    private void HandleShow(string title, string message, ToastLevel level)
+    {
+        var toast = new ToastModel { Title = title, Message = message, Level = level };
+        _activeToasts.Add(toast);
+
+        // Автоматическое скрытие через 5 секунд
+        var timer = new Timer(5000);
+        timer.Elapsed += (s, e) => { RemoveToast(toast); timer.Dispose(); };
+        timer.Start();
+
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void RemoveToast(ToastModel toast)
+    {
+        _activeToasts.Remove(toast);
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose() => ToastService.OnShow -= HandleShow;
+
+    private class ToastModel
+    {
+        public string Title { get; set; }
+        public string Message { get; set; }
+        public ToastLevel Level { get; set; }
+    }
+}

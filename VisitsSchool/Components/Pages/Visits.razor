@@ -1,5 +1,6 @@
 ﻿@page "/visits"
 
+@using Microsoft.Extensions.Logging
 @using VisitsApp.Core.Models
 @using VisitsApp.Core.Services
 @using System.Globalization
@@ -8,6 +9,7 @@
 @inject VisitService VisitService
 @inject ScheduleService ScheduleService;
 @inject GroupService groupService;
+@inject ILogger<VisitService> Logger;
 
 <div class="container-fluid py-3">
     <h3 class="mb-3">Посещения</h3>
@@ -216,7 +218,7 @@
         }
         catch(Exception ex)
         {
-
+            Logger.LogError($"Ошибка при сохранении посещаемости: {ex.Message}. {ex.InnerException?.Message}");
         }
         isLoading = false;
         isEditing = false;

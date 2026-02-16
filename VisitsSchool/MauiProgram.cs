@@ -61,6 +61,8 @@ namespace VisitSchool
                 //dbcontext
                 builder.Services.AddDbContext<ApplicationContext>();
 
+
+                builder.Services.AddSingleton<ToastService>();
                 //repositories
                 builder.Services.AddScoped<IStudentRepository, StudentsRepository>();
                 builder.Services.AddScoped<IVisitsRepository, VisitsRepository>();

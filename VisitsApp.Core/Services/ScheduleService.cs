@@ -74,5 +74,19 @@ namespace VisitsApp.Core.Services
                 throw ex;
             }
         }
+
+        public async Task DeleteSchedule(int scheduleId)
+        {
+            try
+            {
+                await _repo.DeleteSchedule(scheduleId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw ex;
+
+            }
+        }
     }
 }

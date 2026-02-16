@@ -84,5 +84,10 @@ namespace VisitsApp.Core.Repositories
 
             return Task.CompletedTask;
         }
+
+        public Task DeleteSchedule(int scheduleId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -2,6 +2,7 @@
 using VisitsApp.Core.Repositories;
 using VisitSchool.DataAccessLayer;
 using VisitsApp.Core.Models;
+using System;
 
 namespace VisitSchool.Repositories.SQLite
 {
@@ -19,6 +20,13 @@ namespace VisitSchool.Repositories.SQLite
             await _db.Schedules.AddAsync(schedule);
             await _db.SaveChangesAsync();
             return schedule;
+        }
+
+        public async Task DeleteSchedule(int scheduleId)
+        {
+            var deleted = new Schedule { Id = scheduleId };
+            _db.Entry(deleted).State = EntityState.Deleted;
+            await _db.SaveChangesAsync();
         }
 
         /// <summary>

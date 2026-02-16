@@ -4,6 +4,7 @@
 @using VisitsApp.Core.Models
 @using VisitsApp.Core.Services
 
+@inject ToastService _toastService;
 @inject ILogger<StudentService> _loggerStudentService; 
 @inject ILogger<GroupService> _loggerGroupService;
 @inject ILogger<DiscountCategoryService> _loggerDiscountCategoryService;
@@ -85,6 +86,9 @@
                           OnClose="HideAddDiscountCategoryModal" 
                           OnSaved="LoadDiscountCategories"/>
 
+@* Уведомления *@
+<ToastContainer/>
+
 
 @code 
 {
@@ -144,7 +148,7 @@
                 lastname = student.Lastname;
                 groupId = student.GroupId ?? 0;
                 categoryId = student.StudentCategoryId ?? 0;
-                
+
                 _loggerStudentService.LogInformation($"Информация об ученике загружена: {name}, {surename}, {lastname}, {groupId}, {categoryId}");
             }
 
@@ -162,12 +166,13 @@
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            await JS.InvokeVoidAsync("alert", "Введите имя ученика");
+            _toastService.ShowError("Введите имя ученика");
             return;
         }
 
         if (string.IsNullOrWhiteSpace(lastname))
         {
+            _toastService.ShowError("Введите фамилию ученика");
             await JS.InvokeVoidAsync("alert", "Введите фамилию ученика");
             return;
         }
@@ -178,13 +183,12 @@
             if(Id != null)
             {
                 await StudentService.UpdateStudentAsync(Id.Value, name, surename, lastname, groupId, categoryId);
-                await JS.InvokeVoidAsync("alert", "Информация обновлена!");
+                _toastService.ShowSuccess("Информация обновлена");
             }
             else
             {
                 await StudentService.AddStudentAsync(name, surename, lastname, groupId, categoryId);
-                await JS.InvokeVoidAsync("alert", "Ученик добавлен");
-
+                _toastService.ShowSuccess("Ученик добавлен!");
                 _loggerStudentService.LogInformation("Ученик добавлен");
                 name = string.Empty;
                 lastname = string.Empty;
@@ -195,7 +199,7 @@
         }
         catch (Exception ex)
         {
-            await JS.InvokeVoidAsync("alert", $"Ошибка: {ex.Message}. Inner Exception: {ex.InnerException?.Message}");
+            _toastService.ShowError("Не удалось добавить информацию об ученике...");
             _loggerStudentService.LogError($"{ex.Message}. {ex.InnerException?.Message}");
         }
         finally

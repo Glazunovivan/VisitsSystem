@@ -13,5 +13,7 @@ namespace VisitsApp.Core.Repositories
         Task<Schedule> Get(int year, int month);
 
         Task UpdateSchedule(Schedule schedule);
+
+        Task DeleteSchedule(int scheduleId);
     }
 }
