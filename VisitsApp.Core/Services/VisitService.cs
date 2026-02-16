@@ -141,5 +141,19 @@ namespace VisitsApp.Core.Services
                 _logger.LogError($"{ex.Message}. Inner Exception {ex.InnerException?.Message}. {currentDateTime}, {newDateTime}, {studentId}", "Не удалось обновить посещение");
             }
         }
+
+
+        public async Task DeleteVisits(int scheduleId)
+        {
+            try
+            {
+                await _visitsRepo.DeleteAllVisits(scheduleId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message}. Inner Exception {ex.InnerException?.Message}.");
+                throw ex;
+            }
+        }
     }
 }

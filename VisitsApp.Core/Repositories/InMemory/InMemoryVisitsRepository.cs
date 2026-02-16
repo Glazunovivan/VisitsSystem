@@ -123,5 +123,10 @@ namespace VisitsApp.Core.Repositories
         {
             throw new NotImplementedException();
         }
+
+        public Task DeleteAllVisits(int scheduleId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

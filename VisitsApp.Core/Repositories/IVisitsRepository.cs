@@ -81,6 +81,13 @@ namespace VisitsApp.Core.Repositories
         Task DeleteVisit(int scheduleId, int day);
 
         /// <summary>
+        /// Удалить все посещения
+        /// </summary>
+        /// <param name="scheduleId"></param>
+        /// <returns></returns>
+        Task DeleteAllVisits(int scheduleId);
+
+        /// <summary>
         /// Получить посещение ученика по дате
         /// </summary>
         /// <returns></returns>

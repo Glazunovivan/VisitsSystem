@@ -19,34 +19,35 @@ namespace VisitSchool.Repositories.SQLite
 
         public async Task AddVisit(AddStudentVisitDto visit)
         {
-            
-            try
+            var day = _db.Schedules.Include(x=>x.Days)
+                                   .First(x => x.Id == visit.ScheduleId)
+                                   .Days
+                                   .FirstOrDefault(x => x.Day == visit.Day);
+            var newVisit = new Visit
             {
-                var day = _db.Schedules.Include(x=>x.Days)
-                                       .First(x => x.Id == visit.ScheduleId)
-                                       .Days
-                                       .FirstOrDefault(x => x.Day == visit.Day);
-                var newVisit = new Visit
-                {
-                    Day = visit.Day,
-                    ScheduleId = visit.ScheduleId,
-                    Status = visit.Status,
-                    StudentId = visit.StudentId,
-                    ScheduleDay = day
-                };
+                Day = visit.Day,
+                ScheduleId = visit.ScheduleId,
+                Status = visit.Status,
+                StudentId = visit.StudentId,
+                ScheduleDay = day
+            };
 
-                await _db.Visits.AddAsync(newVisit);
-                await _db.SaveChangesAsync();   
-            }
-            catch (Exception ex)
-            {
+            await _db.Visits.AddAsync(newVisit);
+            await _db.SaveChangesAsync();
+        }
 
-            }
+        public async Task DeleteAllVisits(int scheduleId)
+        {
+            var visitsToDelete = await _db.Visits.AsNoTracking().Where(x=>x.ScheduleId == scheduleId).ToListAsync();
+
+            _db.Visits.RemoveRange(visitsToDelete);
+
+            await _db.SaveChangesAsync();   
         }
 
         public async Task DeleteVisit(int scheduleId, int day)
         {
-            var existVisit = await _db.Visits.FirstOrDefaultAsync(x=>x.ScheduleId == scheduleId && x.Day == day);
+            var existVisit = await _db.Visits.AsNoTracking().FirstOrDefaultAsync(x=>x.ScheduleId == scheduleId && x.Day == day);
             if (existVisit != null)
             {
                 _db.Visits.Entry(existVisit).State = EntityState.Deleted;
@@ -122,19 +123,12 @@ namespace VisitSchool.Repositories.SQLite
 
         public async Task UpdateStatusVisitStudent(int scheduleId, int day, int studentId, int status)
         {
-            try
-            {
-                var visit = await _db.Visits.AsNoTracking().FirstOrDefaultAsync(x => x.ScheduleId == scheduleId && x.Day == day && x.StudentId == studentId);
+            var visit = await _db.Visits.AsNoTracking().FirstOrDefaultAsync(x => x.ScheduleId == scheduleId && x.Day == day && x.StudentId == studentId);
 
-                visit.Status = status;
-                _db.Entry(visit).State = EntityState.Modified;
+            visit.Status = status;
+            _db.Entry(visit).State = EntityState.Modified;
 
-                await _db.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-
-            }
+            await _db.SaveChangesAsync();
         }
 
         public async Task UpdateVisitStudent(DateTime currentDateTime, DateTime newDateTime, int studentId)
@@ -153,7 +147,7 @@ namespace VisitSchool.Repositories.SQLite
             existsVisit.Schedule.Month = newDateTime.Month;
 
             _db.Entry(existsVisit).State = EntityState.Modified;
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
     }
 }

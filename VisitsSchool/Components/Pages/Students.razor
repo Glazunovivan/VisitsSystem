@@ -7,7 +7,6 @@
 @inject NavigationManager NavManager
 @inject StudentService StudentService
 
-<h3>Ученики</h3>
 @if(isLoading)
 {
     <div class="d-flex align-items-center">
@@ -19,7 +18,7 @@ else
 {
     <div>
         <div class="container d-inline-flex justify-content-md-start">
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center border-bottom pb-2">
                 <h3>Ученики</h3>
                 <button class="btn btn-primary justify-content-end" @onclick="AddStudent">
                     <span class="bi bi-plus-square"></span> Добавить ученика

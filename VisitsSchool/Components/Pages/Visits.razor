@@ -62,9 +62,14 @@
             <h5 class="mb-0 text-muted">@selectedDate.Value.ToString("D", new CultureInfo("ru-RU"))</h5>
             @if (!isEditing)
             {
-                <button class="btn btn-warning px-4" @onclick="() => isEditing = true">
-                    <i class="bi bi-pencil-square me-1"></i> Редактировать
-                </button>
+                <div class="btn-group">
+                    <button class="btn btn-warning px-4" @onclick="() => isEditing = true">
+                        <i class="bi bi-pencil-square me-1"></i> Редактировать
+                    </button>
+                    <button class="btn btn-danger px-4" @onclick="ClearVisitsForSchedule">
+                        <i class="bi bi-pencil-square me-1"></i>Очистить
+                    </button>
+                </div>
             }
             else
             {
@@ -225,6 +230,22 @@
         StateHasChanged();
     }
 
+
+    private async Task ClearVisitsForSchedule()
+    {
+        if (selectedScheduleId == null)
+        {
+            return;
+        }
+
+        await VisitService.DeleteVisits(selectedScheduleId.Value);
+
+        if (selectedDate != null)
+        {
+            SelectDate(selectedDate.Value);
+        }
+    }
+
     private void OnScheduleChange()
     {
         dates.Clear();
@@ -326,4 +347,5 @@
             </table>
         </div>
     };
+    
 }
