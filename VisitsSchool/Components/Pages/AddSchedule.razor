@@ -70,6 +70,7 @@ else
         </div>
     }
 </div>
+
 <!-- Кнопки дней -->
 @foreach (var week in weeks)
 {
@@ -96,11 +97,8 @@ else
 
 <!-- Кнопка сохранить -->
 <div class="row">
-    <div class="col-4">
-        <button type="button" class="btn btn-success" 
-                @onclick="SaveSchedule">
-            Сохранить расписание
-        </button>
+    <div class="col-3" >
+        <button type="button" class="btn btn-success" @onclick="SaveSchedule">Сохранить</button>
     </div>
 </div>
 
@@ -145,18 +143,32 @@ else
             scheduleName = string.IsNullOrEmpty(loadedSchedule.ScheduleName) ? $"{months[selectedMonthIndex.Value]} {loadedSchedule.Year}" 
                                                                              : loadedSchedule.ScheduleName;
 
-            int daysInMonth = DateTime.DaysInMonth(loadedSchedule.Year, loadedSchedule.Month);
-            List<DateTime> allDays = new List<DateTime>();
-            for (int day = 1; day <= daysInMonth; day++)
+            // int daysInMonth = DateTime.DaysInMonth(loadedSchedule.Year, loadedSchedule.Month);
+            // List<DateTime> allDays = new List<DateTime>();
+            // for (int day = 1; day <= daysInMonth; day++)
+            // {
+            //     var newDay = new DateTime(loadedSchedule.Year, loadedSchedule.Month, day);
+            //     allDays.Add(newDay);
+            //     if (loadedSchedule.Days.FirstOrDefault(x=>x.Day == day) != null)
+            //     {
+            //         ToggleDaySelection(newDay);
+            //     }
+            // }
+            // BuildCalendar(allDays);
+
+            var calendar = service.BuildCalendar(loadedSchedule.Year, loadedSchedule.Month);
+            weeks.Clear();
+            weeks.AddRange(calendar);
+            foreach (var week in weeks)
             {
-                var newDay = new DateTime(loadedSchedule.Year, loadedSchedule.Month, day);
-                allDays.Add(newDay);
-                if (loadedSchedule.Days.FirstOrDefault(x=>x.Day == day) != null)
+                foreach (var date in week.Where(x=>x != null))
                 {
-                    ToggleDaySelection(newDay);
+                    if (loadedSchedule.Days.FirstOrDefault(x => x.Day == date.Value.Day) != null)
+                    {
+                        ToggleDaySelection(date.Value);
+                    }
                 }
             }
-            BuildCalendar(allDays);
 
             StateHasChanged();
         }
@@ -179,14 +191,19 @@ else
         scheduleName = $"{months[monthIndex]} {currentYear}";
         SelectedDays.Clear(); // Очищаем выбранные дни при смене месяца
 
-        int daysInMonth = DateTime.DaysInMonth(year, monthIndex + 1);
-        List<DateTime> allDays = new List<DateTime>();
-        for (int day = 1; day <= daysInMonth; day++)
-        {
-            allDays.Add(new DateTime(year, monthIndex + 1, day));
-        }
+        // int daysInMonth = DateTime.DaysInMonth(year, monthIndex + 1);
+        // List<DateTime> allDays = new List<DateTime>();
+        // for (int day = 1; day <= daysInMonth; day++)
+        // {
+        //     allDays.Add(new DateTime(year, monthIndex + 1, day));
+        // }
 
-        BuildCalendar(allDays);
+        // BuildCalendar(allDays);
+
+        var calendar = service.BuildCalendar(year, monthIndex+1);
+        weeks.Clear();
+        weeks.AddRange(calendar);
+
         StateHasChanged(); // Обновляем UI, чтобы кнопки дней перерисовались
     }
 
@@ -258,31 +275,5 @@ else
     {
         weeks.Clear();
 
-        var ordered = dates.OrderBy(x=>x).ToList();
-        var first = ordered.First();
-
-        int shift = ((int)first.DayOfWeek + 6) % 7; //Пн
-
-        var temp = new List<DateTime?>();
-
-        for (int i = 0; i < shift; i++)
-        {
-            temp.Add(null);
-        }
-
-        foreach (var d in ordered)
-        {
-            temp.Add(d);
-        }
-
-        while (temp.Count % 7 != 0)
-        {
-            temp.Add(null);
-        }
-
-        for (int i = 0; i < temp.Count; i += 7)
-        {
-            weeks.Add(temp.Skip(i).Take(7).ToList());
-        }
     }
 }

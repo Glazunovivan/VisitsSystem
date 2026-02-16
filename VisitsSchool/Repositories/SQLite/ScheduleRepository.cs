@@ -2,7 +2,6 @@
 using VisitsApp.Core.Repositories;
 using VisitSchool.DataAccessLayer;
 using VisitsApp.Core.Models;
-using System;
 
 namespace VisitSchool.Repositories.SQLite
 {
@@ -36,8 +35,8 @@ namespace VisitSchool.Repositories.SQLite
         /// <returns></returns>
         public async Task<Schedule> Get(int scheduleId)
         {
-            return await _db.Schedules.Include(x => x.Days)
-                                      .AsNoTracking()
+            return await _db.Schedules.AsNoTracking()
+                                      .Include(x => x.Days)
                                       .FirstOrDefaultAsync(x=>x.Id == scheduleId);
         }
 
@@ -49,8 +48,8 @@ namespace VisitSchool.Repositories.SQLite
         /// <returns></returns>
         public async Task<Schedule> Get(int year, int month)
         {
-            return await _db.Schedules.Include(x => x.Days)
-                                      .AsNoTracking()
+            return await _db.Schedules.AsNoTracking()
+                                      .Include(x => x.Days)
                                       .FirstOrDefaultAsync(x=>x.Month == month && x.Year == year);
         }
 
@@ -60,8 +59,8 @@ namespace VisitSchool.Repositories.SQLite
         /// <returns></returns>
         public async Task<List<Schedule>> GetAll()
         {
-            return await _db.Schedules.Include(x=>x.Days)
-                                      .AsNoTracking()
+            return await _db.Schedules.AsNoTracking()
+                                      .Include(x=>x.Days)
                                       .ToListAsync();
         }
 
@@ -72,7 +71,18 @@ namespace VisitSchool.Repositories.SQLite
         /// <returns></returns>
         public async Task UpdateSchedule(Schedule schedule)
         {
-            _db.Entry(schedule).State = EntityState.Modified;
+            // 1. Находим все старые дни этого расписания в базе (БЕЗ AsNoTracking)
+            var oldDays = await _db.Days
+                                   .Where(d => d.ScheduleId == schedule.Id)
+                                   .ToListAsync();
+
+            // 2. Удаляем их
+            _db.Days.RemoveRange(oldDays);
+
+            // 3. Обновляем само расписание
+            _db.Schedules.Update(schedule);
+
+            // 4. Сохраняем всё одним махом
             await _db.SaveChangesAsync();
         }
     }

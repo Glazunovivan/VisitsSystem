@@ -62,11 +62,11 @@ namespace VisitsApp.Core.Services
             }
         }
 
-        public Task<Schedule> GetSchedule(int scheduleId)
+        public async Task<Schedule> GetSchedule(int scheduleId)
         {
             try
             {
-                return _repo.Get(scheduleId);
+                return await _repo.Get(scheduleId);
             }
             catch (Exception ex)
             {
@@ -87,6 +87,54 @@ namespace VisitsApp.Core.Services
                 throw ex;
 
             }
+        }
+
+        /// <summary>
+        /// Поистроить календарь
+        /// </summary>
+        /// <param name="year"></param>
+        /// <param name="month"></param>
+        /// <returns></returns>
+        public List<List<DateTime?>> BuildCalendar(int year, int month)
+        {
+            List<List<DateTime?>> weeks = new List<List<DateTime?>>();
+
+            int daysInMonth = DateTime.DaysInMonth(year, month);
+            List<DateTime> allDays = new List<DateTime>();
+            for (int day = 1; day <= daysInMonth; day++)
+            {
+                allDays.Add(new DateTime(year, month, day));
+            }
+
+            //построение недели
+            var ordered = allDays.OrderBy(x => x).ToList();
+            var first = ordered.First();
+
+            int shift = ((int)first.DayOfWeek + 6) % 7; //Пн
+
+            var temp = new List<DateTime?>();
+
+            for (int i = 0; i < shift; i++)
+            {
+                temp.Add(null);
+            }
+
+            foreach (var d in ordered)
+            {
+                temp.Add(d);
+            }
+
+            while (temp.Count % 7 != 0)
+            {
+                temp.Add(null);
+            }
+
+            for (int i = 0; i < temp.Count; i += 7)
+            {
+                weeks.Add(temp.Skip(i).Take(7).ToList());
+            }
+
+            return weeks;
         }
     }
 }

@@ -22,14 +22,17 @@ namespace VisitSchool.DataAccessLayer
         /// Скидки
         /// </summary>
         public DbSet<DiscountCategory> StudentCategories => Set<DiscountCategory>();
+
         /// <summary>
         /// Сетка расписания
         /// </summary>
         public DbSet<Schedule> Schedules => Set<Schedule>();
+
         /// <summary>
         /// Дни в расписании
         /// </summary>
-        public DbSet<Schedule> Days => Set<Schedule>();
+        public DbSet<ScheduleDay> Days => Set<ScheduleDay>();
+        
         /// <summary>
         /// Посещения
         /// </summary>
