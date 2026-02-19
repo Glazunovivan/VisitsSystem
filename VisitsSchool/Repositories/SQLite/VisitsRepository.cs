@@ -86,7 +86,8 @@ namespace VisitSchool.Repositories.SQLite
 
         public async Task<Visit> GetVisitByStudentDate(int scheduleId, int day, int studentId)
         {
-            return await _db.Visits.AsNoTracking().FirstOrDefaultAsync(x=>x.ScheduleId == scheduleId && x.Day == day && x.StudentId == studentId);
+            return await _db.Visits.AsNoTracking()
+                                   .FirstOrDefaultAsync(x=>x.ScheduleId == scheduleId && x.Day == day && x.StudentId == studentId);
         }
 
         public async Task<List<Visit>> GetVisitByStudentId(int id)

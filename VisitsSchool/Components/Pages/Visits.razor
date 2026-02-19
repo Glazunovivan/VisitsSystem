@@ -257,7 +257,7 @@
         }
 
         var schedule = schedules.FirstOrDefault(x => x.Id == selectedScheduleId);
-        foreach (var d in schedule.Days)
+        foreach (var d in schedule.Days.OrderBy(x=>x.Day))
         {
             dates.Add(new DateTime(schedule.Year, schedule.Month, d.Day));
         }

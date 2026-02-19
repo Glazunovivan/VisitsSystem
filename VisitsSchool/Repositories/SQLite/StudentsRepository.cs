@@ -35,6 +35,9 @@ namespace VisitSchool.Repositories.SQLite
             return await _dpContext.Students.AsNoTracking()
                                             .Include(x=>x.Group)
                                             .Include(x=>x.StudentCategory)
+                                            .OrderBy(x=>x.Lastname)
+                                            .ThenBy(x=>x.Name)
+                                            .ThenBy(x=>x.Surename)
                                             .ToListAsync();
         }
 
