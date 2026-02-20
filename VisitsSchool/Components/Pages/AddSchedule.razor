@@ -2,6 +2,7 @@
 @using Microsoft.Extensions.Logging
 @using VisitsApp.Core.Services
 
+@inject ToastService _toastService;
 @inject ScheduleService service;
 @inject ILogger<ScheduleService> Logger;
 
@@ -102,6 +103,8 @@ else
     </div>
 </div>
 
+@* Уведомления *@
+<ToastContainer />
 
 
 @code 
@@ -143,19 +146,6 @@ else
             scheduleName = string.IsNullOrEmpty(loadedSchedule.ScheduleName) ? $"{months[selectedMonthIndex.Value]} {loadedSchedule.Year}" 
                                                                              : loadedSchedule.ScheduleName;
 
-            // int daysInMonth = DateTime.DaysInMonth(loadedSchedule.Year, loadedSchedule.Month);
-            // List<DateTime> allDays = new List<DateTime>();
-            // for (int day = 1; day <= daysInMonth; day++)
-            // {
-            //     var newDay = new DateTime(loadedSchedule.Year, loadedSchedule.Month, day);
-            //     allDays.Add(newDay);
-            //     if (loadedSchedule.Days.FirstOrDefault(x=>x.Day == day) != null)
-            //     {
-            //         ToggleDaySelection(newDay);
-            //     }
-            // }
-            // BuildCalendar(allDays);
-
             var calendar = service.BuildCalendar(loadedSchedule.Year, loadedSchedule.Month);
             weeks.Clear();
             weeks.AddRange(calendar);
@@ -191,15 +181,6 @@ else
         scheduleName = $"{months[monthIndex]} {currentYear}";
         SelectedDays.Clear(); // Очищаем выбранные дни при смене месяца
 
-        // int daysInMonth = DateTime.DaysInMonth(year, monthIndex + 1);
-        // List<DateTime> allDays = new List<DateTime>();
-        // for (int day = 1; day <= daysInMonth; day++)
-        // {
-        //     allDays.Add(new DateTime(year, monthIndex + 1, day));
-        // }
-
-        // BuildCalendar(allDays);
-
         var calendar = service.BuildCalendar(year, monthIndex+1);
         weeks.Clear();
         weeks.AddRange(calendar);
@@ -224,49 +205,78 @@ else
         if (currentYear == null)
         {
             Logger.LogWarning("Сохранение расписания отменено, не выбран год");
+            _toastService.ShowError("Выберите год");
             return;
         }
         if (selectedMonthIndex == null)
         {
             Logger.LogWarning("Сохранение расписания отменено, не выбран месяц");
+            _toastService.ShowError("Выберите месяц");
             return;
         }
         if (SelectedDays.Count == 0)
         {
             Logger.LogWarning("Сохранение расписания отменено, не выбраны дни");
+            _toastService.ShowError("Выберите хотя бы 1 день");
             return;
         }
 
-        var days = SelectedDays.Select(x=>x.Day).ToList();
-        var schedule = new VisitsApp.Core.Models.Schedule
-        {
-             CostSubscriptions = costSubscriptions,
-             Month = selectedMonthIndex.Value + 1,
-             ScheduleName = scheduleName,
-             Year = currentYear.Value,
-             Days = new List<VisitsApp.Core.Models.ScheduleDay?>(days.Count)
-        };
-        foreach (var d in days)
-        {
-            schedule.Days.Add(new VisitsApp.Core.Models.ScheduleDay { Schedule = schedule, Day = d });
-        }
 
         try
         {
             if (Id != null)
             {
-                schedule.Id = Id.Value;
+                var days = SelectedDays.Select(x => x.Day).ToList();
+                //обновление
+                var schedule = await service.GetSchedule(Id.Value);
+                schedule.Days.Clear();
+                foreach (var d in days)
+                {
+                    schedule.Days.Add(new VisitsApp.Core.Models.ScheduleDay { Schedule = schedule, Day = d });
+                }
+                schedule.CostSubscriptions = costSubscriptions;
+                schedule.Month = selectedMonthIndex.Value + 1;
+                schedule.ScheduleName = scheduleName;
+                schedule.Year = currentYear.Value;
+
                 await service.UpdateShedule(schedule);
+
+                _toastService.ShowSuccess("Расписание успешно обновлено!");
             }
             else
             {
-                await service.AddSchedule(schedule);
-            }
+                //добавление
+                var days = SelectedDays.Select(x => x.Day).ToList();
 
-            SelectedDays.Clear();
+                var schedule = new VisitsApp.Core.Models.Schedule
+                {
+                    CostSubscriptions = costSubscriptions,
+                    Month = selectedMonthIndex.Value + 1,
+                    ScheduleName = scheduleName,
+                    Year = currentYear.Value,
+                    Days = new List<VisitsApp.Core.Models.ScheduleDay?>(days.Count)
+                };
+                foreach (var d in days)
+                {
+                    schedule.Days.Add(new VisitsApp.Core.Models.ScheduleDay { Schedule = schedule, Day = d });
+                }
+
+                await service.AddSchedule(schedule);
+                SelectedDays.Clear();
+
+                _toastService.ShowSuccess("Расписание успешно создано!");
+            }
         }
         catch (Exception ex)
         {
+            if (Id != null)
+            {
+                _toastService.ShowError("Не удалось обновить расписание");
+            }
+            else
+            {
+                _toastService.ShowError("Не удалось добавить расписание");
+            }
             Logger.LogError(ex.Message);
         }
     }
@@ -274,6 +284,5 @@ else
     private void BuildCalendar(List<DateTime> dates)
     {
         weeks.Clear();
-
     }
 }

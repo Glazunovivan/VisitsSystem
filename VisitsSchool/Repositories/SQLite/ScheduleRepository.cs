@@ -23,9 +23,15 @@ namespace VisitSchool.Repositories.SQLite
 
         public async Task DeleteSchedule(int scheduleId)
         {
-            var deleted = new Schedule { Id = scheduleId };
-            _db.Entry(deleted).State = EntityState.Deleted;
-            await _db.SaveChangesAsync();
+            var schedule = await _db.Schedules
+                                  .Include(s => s.Days) // Загружаем связанные дни, чтобы EF их тоже удалил
+                                  .FirstOrDefaultAsync(s => s.Id == scheduleId);
+
+            if (schedule != null)
+            {
+                _db.Schedules.Remove(schedule);
+                await _db.SaveChangesAsync();
+            }
         }
 
         /// <summary>
@@ -71,18 +77,21 @@ namespace VisitSchool.Repositories.SQLite
         /// <returns></returns>
         public async Task UpdateSchedule(Schedule schedule)
         {
-            // 1. Находим все старые дни этого расписания в базе (БЕЗ AsNoTracking)
-            var oldDays = await _db.Days
-                                   .Where(d => d.ScheduleId == schedule.Id)
-                                   .ToListAsync();
-
-            // 2. Удаляем их
+            //удаляем старые дни
+            var oldDays = _db.Days.Where(d => d.ScheduleId == schedule.Id);
             _db.Days.RemoveRange(oldDays);
 
-            // 3. Обновляем само расписание
-            _db.Schedules.Update(schedule);
+            // Ищем в трекере объект Schedule с таким же Id
+            var trackedEntity = _db.Schedules.Local.FirstOrDefault(x => x.Id == schedule.Id);
 
-            // 4. Сохраняем всё одним махом
+            if (trackedEntity != null)
+            {
+                // Если нашли — отсоединяем его, чтобы прикрепить новый
+                _db.Entry(trackedEntity).State = EntityState.Detached;
+            }
+
+            // Теперь можно безопасно вызвать Update
+            _db.Schedules.Update(schedule);
             await _db.SaveChangesAsync();
         }
     }

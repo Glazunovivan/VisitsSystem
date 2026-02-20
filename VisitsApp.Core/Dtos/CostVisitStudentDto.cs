@@ -56,11 +56,5 @@
         /// Название расписания
         /// </summary>
         public string ScheduleName { get; set; }
-
-
-        public CostVisitStudentDto()
-        {
-            
-        }
     }
 }

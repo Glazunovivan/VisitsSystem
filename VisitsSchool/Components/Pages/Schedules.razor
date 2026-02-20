@@ -80,6 +80,7 @@
         try
         {
             await service.DeleteSchedule(scheduleId);
+            schedules = await service.GetAllSchedules();
         }
         catch (Exception ex)
         {

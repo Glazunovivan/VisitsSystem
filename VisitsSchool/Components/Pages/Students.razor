@@ -7,74 +7,89 @@
 @inject NavigationManager NavManager
 @inject StudentService StudentService
 
-@if(isLoading)
-{
-    <div class="d-flex align-items-center">
-        <strong>Загрузка...</strong>
-        <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
-    </div>
-}
-else
-{
-    <div>
-        <div class="container d-inline-flex justify-content-md-start">
-            <div class="d-flex align-items-center border-bottom pb-2">
-                <h3>Ученики</h3>
-                <button class="btn btn-primary justify-content-end" @onclick="AddStudent">
-                    <span class="bi bi-plus-square"></span> Добавить ученика
-                </button>
+<div class="container-fluid py-3">
+    @if (isLoading)
+    {
+        <div class="d-flex align-items-center">
+            <strong>Загрузка...</strong>
+            <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+        </div>
+    }
+    else
+    {
+        <div>
+            <div class="col-md-6 col-lg-8 d-flex justify-content-md-end">
+                <div class="btn-group shadow-sm" role="group" aria-label="Вид отображения">
+                    <input type="radio" class="btn-check" name="viewmode"
+                           id="v_group" checked="@(viewMode == ViewMode.ByGroups)"
+                           @onclick="() => SetViewMode(ViewMode.ByGroups)">
+                    <label class="btn btn-outline-primary" for="v_group">
+                        <i class="bi bi-grid-fill me-1"></i> По группам
+                    </label>
+
+                    <input type="radio" class="btn-check"
+                           name="viewmode" id="v_all"
+                           checked="@(viewMode == ViewMode.All)" @onclick="() => SetViewMode(ViewMode.All)">
+                    <label class="btn btn-outline-primary" for="v_all">
+                        <i class="bi bi-list-ul me-1"></i> Все
+                    </label>
+                </div>
+            </div>
+
+            <div class="container d-inline-flex justify-content-md-start">
+                <div class="d-flex align-items-center border-bottom pb-2">
+                    <h3>Ученики</h3>
+                    <button class="btn btn-primary justify-content-end" @onclick="AddStudent">
+                        <span class="bi bi-plus-square"></span> Добавить ученика
+                    </button>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                @if (viewMode == ViewMode.ByGroups)
+                {
+                    <div class="accordion accordion-flush" id="accordionStudents">
+                        @foreach (var g in grouppedStudents)
+                        {
+                            var collapseId = $"grp-{g.Key}";
+                            <div class="accordion-item border-bottom">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed bg-light fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId">
+                                        <span class="badge bg-primary me-2">@g.Value.Count()</span> @(groups.ContainsKey(g.Key) ? groups[g.Key].Name : "Без группы")
+                                    </button>
+                                </h2>
+                                <div id="@collapseId" class="accordion-collapse collapse" data-bs-parent="#accordionStudents">
+                                    <div class="accordion-body p-0">
+                                        @RenderTable(g.Value)
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="p-0">
+                        @RenderTable(students)
+                    </div>
+                }
             </div>
         </div>
-
-        <div class="table-responsive">
-            <table class="table table-striped table-hover table-bordered align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th scope="col">ID</th>
-                        <th scope="col">Фамилия</th>
-                        <th scope="col">Имя</th>
-                        <th scope="col">Отчество</th>
-                        <th scope="col">Группа</th>
-                        <th scope="col">Скидка</th>
-                        <th scope="col"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var s in students)
-                    {
-                        <tr>
-                            <td>@s.Id</td>
-                            <td>@s.Lastname</td>
-                            <td>@s.Name</td>
-                            <td>@s.Surename</td>
-                            <td>@s.Group?.Name</td>
-                            <td>@s.StudentCategory?.DscountPercent</td>
-                            <td class="text-center">
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <button class="btn btn-primary"
-                                            title="Редактировать"
-                                            @onclick="() => EditStudent(s.Id)">
-                                        <span class="bi bi-pencil" aria-hidden="true">Ред.</span>
-                                    </button>
-                                    <button class="btn btn-danger"
-                                            title="Удалить"
-                                            @onclick="() => ConfirmDelete(s)">
-                                        <span class="bi bi-trash" aria-hidden="true">Уд.</span>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-}
+    }
+</div>
 
 @code 
 {
     private bool isLoading;
     private List<Student> students;
+
+    private Dictionary<int, Group> groups = new();
+    private Dictionary<int, List<Student>> grouppedStudents = new();
+
+    private enum ViewMode { ByGroups, All }
+    private ViewMode viewMode = ViewMode.ByGroups;
+
+    private void SetViewMode(ViewMode mode) => viewMode = mode;
 
     private void AddStudent()
     {
@@ -118,6 +133,31 @@ else
         // Заполнение списка
         students = await StudentService.GetAllStudentsAsync();
 
+        groups = new Dictionary<int, Group>();
+        groups.Add(-1, new Group { Id = -1, Name = "<без группы>" });
+
+        var uniqueGroups = students
+                           .Where(s => s.GroupId.HasValue) // Игнорируем студентов без группы (для формирования словаря групп)
+                           .Select(s => s.Group) // Предполагаем, что у Student есть свойство Group, которое ссылается на объект Group
+                           .Where(g => g != null) // Убедимся, что объект Group не null
+                           .DistinctBy(g => g.Id) // Берем только уникальные группы по Id
+                           .ToList();
+
+        foreach (var group in uniqueGroups)
+        {
+            if (!groups.ContainsKey(group.Id))
+            {
+                groups.Add(group.Id, group);
+            }
+        }
+
+        grouppedStudents = students
+                          .GroupBy(s => s.GroupId ?? -1) // Группируем по Id группы, null заменяется на -1
+                          .ToDictionary(
+                              g => g.Key, // Ключ словаря - Id группы
+                              g => g.ToList() // Значение словаря - список студентов в этой группе
+                          );
+
         isLoading = false;
     }
 
@@ -125,4 +165,57 @@ else
     {
         NavManager.NavigateTo($"/add-discount-category");
     }
+
+    //Метод для отрисовки таблицы
+    private RenderFragment RenderTable(IEnumerable<Student> students) => __builder =>
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Фамилия</th>
+                        <th>Имя</th>
+                        <th>Отчество</th>
+                        @if (viewMode == ViewMode.All)
+                        {
+                            <th>Группа</th>
+                        }
+                        <th style="width: auto;">Скидка</th>
+                        <th scope="col">ID</th>
+                        <th style="width:auto"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in students)
+                    {
+                        <tr>
+                           <td>@s.Lastname</td>
+                            <td>@s.Name</td>
+                            <td>@s.Surename</td>
+                            @if(viewMode == ViewMode.All)
+                            {
+                                <td>@s.Group?.Name</td>
+                            }
+                            <td>@s.StudentCategory?.DscountPercent</td>
+                            <td>@s.Id</td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button class="btn btn-primary"
+                                            title="Редактировать"
+                                            @onclick="() => EditStudent(s.Id)">
+                                        <span class="bi bi-pencil" aria-hidden="true">Ред.</span>
+                                    </button>
+                                    <button class="btn btn-danger"
+                                            title="Удалить"
+                                            @onclick="() => ConfirmDelete(s)">
+                                        <span class="bi bi-trash" aria-hidden="true">Уд.</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    };
 }
