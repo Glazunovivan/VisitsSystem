@@ -17,33 +17,37 @@
     }
     else
     {
-        <div>
-            <div class="col-md-6 col-lg-8 d-flex justify-content-md-end">
-                <div class="btn-group shadow-sm" role="group" aria-label="Вид отображения">
-                    <input type="radio" class="btn-check" name="viewmode"
-                           id="v_group" checked="@(viewMode == ViewMode.ByGroups)"
-                           @onclick="() => SetViewMode(ViewMode.ByGroups)">
-                    <label class="btn btn-outline-primary" for="v_group">
-                        <i class="bi bi-grid-fill me-1"></i> По группам
-                    </label>
+        <h3 class="mb-3">Ученики</h3>
 
-                    <input type="radio" class="btn-check"
-                           name="viewmode" id="v_all"
-                           checked="@(viewMode == ViewMode.All)" @onclick="() => SetViewMode(ViewMode.All)">
-                    <label class="btn btn-outline-primary" for="v_all">
-                        <i class="bi bi-list-ul me-1"></i> Все
-                    </label>
+        <div class="row mb-3 align-items-center">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="input-group">
+                        <span class="input-group-text" id="search-addon"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" placeholder="Поиск..." aria-label="Поиск учеников" aria-describedby="search-addon">
+                    </div>
                 </div>
-            </div>
-
-            <div class="container d-inline-flex justify-content-md-start">
-                <div class="d-flex align-items-center border-bottom pb-2">
-                    <h3>Ученики</h3>
-                    <button class="btn btn-primary justify-content-end" @onclick="AddStudent">
+                <div>
+                    <div class="btn-group shadow-sm" role="group" aria-label="Вид отображения">
+                        <input type="radio" class="btn-check" name="viewmode"
+                               id="v_group" checked="@(viewMode == ViewMode.ByGroups)"
+                               @onclick="() => SetViewMode(ViewMode.ByGroups)">
+                        <label class="btn btn-outline-primary" for="v_group">
+                            <i class="bi bi-grid-fill me-1"></i> По группам
+                        </label>
+                        <input type="radio" class="btn-check"
+                               name="viewmode" id="v_all"
+                               checked="@(viewMode == ViewMode.All)" @onclick="() => SetViewMode(ViewMode.All)">
+                        <label class="btn btn-outline-primary" for="v_all">
+                            <i class="bi bi-list-ul me-1"></i> Все
+                        </label>
+                    </div>
+                    <button class="btn btn-primary ms-2" @onclick="AddStudent">
                         <span class="bi bi-plus-square"></span> Добавить ученика
                     </button>
                 </div>
             </div>
+            
 
             <div class="card shadow-sm border-0">
                 @if (viewMode == ViewMode.ByGroups)
