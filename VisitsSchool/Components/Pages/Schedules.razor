@@ -8,51 +8,60 @@
 @inject NavigationManager NavManager
 @inject ScheduleService service;
 
-<div class="container d-inline-flex justify-content-md-start">
-    <div class="d-flex align-items-center border-bottom pb-2">
-        <h3>Расписания</h3>
-        <button class="btn btn-primary" @onclick="CreateSchedule">
-            <span class="bi bi-plus-square"></span> Добавить расписание
-        </button>
+<div class="container mt-4">
+
+    <!-- Заголовок -->
+    <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-2">
+        <h3 class="fw-bold mb-0">Расписания</h3>
+    </div>
+
+        <div class="align-items-end border-bottom pb-2">
+            <button class="btn btn-primary" @onclick="CreateSchedule">
+                <span class="bi bi-plus-square"></span> Добавить расписание
+            </button>
+        </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Кол-во дней</th>
+                        <th>Стоимость абонемента</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var schedule in schedules)
+                    {
+                        <tr>
+                            <td>@schedule.ScheduleName</td>
+                            <td>@schedule.Days.Count</td>
+                            <td>@schedule.CostSubscriptions</td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button class="btn btn-primary"
+                                            title="Редактировать"
+                                            @onclick="()=>UpdateSchedule(schedule.Id)">
+                                        <span class="bi bi-pencil" aria-hidden="true">Ред.</span>
+                                    </button>
+                                    <button class="btn btn-danger"
+                                            title="Удалить"
+                                            @onclick="() => Delete(schedule.Id)">
+                                        <span class="bi bi-trash" aria-hidden="true">Уд.</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        
     </div>
 </div>
 
-<div class="container">
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Название</th>
-                <th>Кол-во дней</th>
-                <th>Стоимость абонемента</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var schedule in schedules)
-            {
-                <tr>
-                    <td>@schedule.ScheduleName</td>
-                    <td>@schedule.Days.Count</td>
-                    <td>@schedule.CostSubscriptions</td>
-                    <td class="text-center">
-                        <div class="btn-group btn-group-sm" role="group">
-                            <button class="btn btn-primary"
-                                    title="Редактировать"
-                                    @onclick="()=>UpdateSchedule(schedule.Id)">
-                                <span class="bi bi-pencil" aria-hidden="true">Ред.</span>
-                            </button>
-                            <button class="btn btn-danger"
-                                    title="Удалить"
-                                    @onclick="() => Delete(schedule.Id)">
-                                <span class="bi bi-trash" aria-hidden="true">Уд.</span>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
 
 @code 
 {

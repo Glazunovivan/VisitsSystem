@@ -26,19 +26,19 @@
             <h5 class="card-title">Редактирование информации об ученике</h5>
         }
 
-        <div class="mb-2">
-            <label class="form-label">Фамилия</label>
-            <input class="form-control" @bind="lastname" />
+        <div class="form-floating mb-3">
+            <input class="form-control" id="floatingInput" placeholder="Иванов" @bind="lastname" />
+            <label for="floatingInput">Фамилия</label>
         </div>
-        <div class="mb-2">
-            <label class="form-label">Имя</label>
-            <input class="form-control" @bind="name"/>
+        <div class="form-floating mb-3">
+            <input class="form-control" id="floatingInput" placeholder="Иван" @bind="name" />
+            <label for="floatingInput">Имя</label>
         </div>
-        <div class="mb-2">
-            <label class="form-label">Отчество</label>
-            <input class="form-control" @bind="surename"/>
+        <div class="form-floating mb-3">
+            <input class="form-control" id="floatingInput" placeholder="Иванович" @bind="surename" />
+            <label for="floatingInput">Отчество</label>
         </div>
-        <div class="mb-2">
+        <div>
             <label class="form-label">Группа</label>
             <div class="d-flex align-items-center">
                 <select class="form-select" @bind="groupId">
@@ -55,7 +55,7 @@
             </div>
 
         </div>
-        <div class="mb-2">
+        <div>
             <label class="form-label">Есть скидка</label>
             <div class="d-flex align-items-center">
                 <select class="form-select" @bind="categoryId">

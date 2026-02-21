@@ -11,107 +11,114 @@
 @inject GroupService groupService;
 @inject ILogger<VisitService> Logger;
 
-<div class="container-fluid py-3">
-    <h3 class="mb-3">Посещения</h3>
-
-    <div class="row g-3 align-items-end mb-4">
-        <div class="col-md-6 col-lg-4">
-            <label class="form-label fw-bold text-secondary small">Расписание</label>
-            <select class="form-select border-primary-subtle" @bind="selectedScheduleId" @bind:after="OnScheduleChange">
-                <option value=""></option>
-                @foreach (var itm in schedules)
-                {
-                    <option value="@itm.Id">@itm.ScheduleName</option>
-                }
-            </select>
-        </div>
-
-        <div class="col-md-6 col-lg-8 d-flex justify-content-md-end">
-            <div class="btn-group shadow-sm" role="group" aria-label="Вид отображения">
-                <input type="radio" class="btn-check" name="viewmode" 
-                       id="v_group" checked="@(viewMode == ViewMode.ByGroups)" 
-                       @onclick="() => SetViewMode(ViewMode.ByGroups)">
-                <label class="btn btn-outline-primary" for="v_group">
-                    <i class="bi bi-grid-fill me-1"></i> По группам
-                </label>
-
-                <input type="radio" class="btn-check" 
-                       name="viewmode" id="v_all" 
-                       checked="@(viewMode == ViewMode.All)" @onclick="() => SetViewMode(ViewMode.All)">
-                <label class="btn btn-outline-primary" for="v_all">
-                    <i class="bi bi-list-ul me-1"></i> Все
-                </label>
-            </div>
-        </div>
+<div class="container mt-4">
+    <!-- Заголовок -->
+    <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-2">
+        <h3 class="fw-bold mb-0">Посещения</h3>
     </div>
 
-    @if (selectedScheduleId != null)
-    {
-        <div class="d-flex overflow-auto pb-3 mb-3 border-bottom custom-scrollbar">
-            @foreach (var date in dates)
-            {
-                <button class="btn btn-sm me-2 @(date.Date == selectedDate.Value.Date ? "btn-primary" : "btn-outline-secondary")" 
-                        @onclick="() => SelectDate(date)" style="min-width: 80px;">
-                    <div class="small">@date.ToString("ddd", new CultureInfo("ru-RU"))</div>
-                    <div class="fw-bold">@date.ToString("dd MMM", new CultureInfo("ru-RU"))</div>
-                </button>
-            }
-        </div>
-
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0 text-muted">@selectedDate.Value.ToString("D", new CultureInfo("ru-RU"))</h5>
-            @if (!isEditing)
-            {
-                <div class="btn-group">
-                    <button class="btn btn-warning px-4" @onclick="() => isEditing = true">
-                        <i class="bi bi-pencil-square me-1"></i> Редактировать
-                    </button>
-                    <button class="btn btn-danger px-4" @onclick="ClearVisitsForSchedule">
-                        <i class="bi bi-pencil-square me-1"></i>Очистить
-                    </button>
-                </div>
-            }
-            else
-            {
-                <div class="btn-group">
-                    <button class="btn btn-success px-4" @onclick="Save">
-                        <i class="bi bi-check-lg me-1"></i> Сохранить
-                    </button>
-                    <button class="btn btn-outline-secondary" @onclick="() => isEditing = false">Отмена</button>
-                </div>
-            }
-        </div>
-
-        <div class="card shadow-sm border-0">
-            @if (viewMode == ViewMode.ByGroups)
-            {
-                <div class="accordion accordion-flush" id="accordionStudents">
-                    @foreach (var g in grouppedStudents)
+    <div class="card shadow-sm border-0">
+        <div class="row g-3 align-items-end mb-4">
+            <div class="col-md-6 col-lg-4">
+                <label class="form-label fw-bold text-secondary small">Расписание</label>
+                <select class="form-select border-primary-subtle" 
+                        @bind="selectedScheduleId" 
+                        @bind:after="OnScheduleChange">
+                    <option value=""></option>
+                    @foreach (var itm in schedules)
                     {
-                        var collapseId = $"grp-{g.Key}";
-                        <div class="accordion-item border-bottom">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed bg-light fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId">
-                                    <span class="badge bg-primary me-2">@g.Value.Count()</span> @(groups.ContainsKey(g.Key) ? groups[g.Key].Name : "Без группы")
-                                </button>
-                            </h2>
-                            <div id="@collapseId" class="accordion-collapse collapse" data-bs-parent="#accordionStudents">
-                                <div class="accordion-body p-0">
-                                    @RenderTable(g.Value)
+                        <option value="@itm.Id">@itm.ScheduleName</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-6 col-lg-8 d-flex justify-content-md-end">
+                <div class="btn-group shadow-sm" role="group" aria-label="Вид отображения">
+                    <input type="radio" class="btn-check" name="viewmode"
+                           id="v_group" checked="@(viewMode == ViewMode.ByGroups)"
+                           @onclick="() => SetViewMode(ViewMode.ByGroups)">
+                    <label class="btn btn-outline-primary" for="v_group">
+                        <i class="bi bi-grid-fill me-1"></i> По группам
+                    </label>
+
+                    <input type="radio" class="btn-check"
+                           name="viewmode" id="v_all"
+                           checked="@(viewMode == ViewMode.All)" @onclick="() => SetViewMode(ViewMode.All)">
+                    <label class="btn btn-outline-primary" for="v_all">
+                        <i class="bi bi-list-ul me-1"></i> Все
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        @if (selectedScheduleId != null)
+        {
+            <div class="d-flex overflow-auto pb-3 mb-3 border-bottom custom-scrollbar">
+                @foreach (var date in dates)
+                {
+                    <button class="btn btn-sm me-2 @(date.Date == selectedDate.Value.Date ? "btn-primary" : "btn-outline-secondary")"
+                            @onclick="() => SelectDate(date)" style="min-width: 80px;">
+                        <div class="small">@date.ToString("ddd", new CultureInfo("ru-RU"))</div>
+                        <div class="fw-bold">@date.ToString("dd MMM", new CultureInfo("ru-RU"))</div>
+                    </button>
+                }
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0 text-muted">@selectedDate.Value.ToString("D", new CultureInfo("ru-RU"))</h5>
+                @if (!isEditing)
+                {
+                    <div class="btn-group">
+                        <button class="btn btn-warning px-4" @onclick="() => isEditing = true">
+                            <i class="bi bi-pencil-square me-1"></i> Редактировать
+                        </button>
+                        <button class="btn btn-danger px-4" @onclick="ClearVisitsForSchedule">
+                            <i class="bi bi-pencil-square me-1"></i>Очистить
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="btn-group">
+                        <button class="btn btn-success px-4" @onclick="Save">
+                            <i class="bi bi-check-lg me-1"></i> Сохранить
+                        </button>
+                        <button class="btn btn-outline-secondary" @onclick="() => isEditing = false">Отмена</button>
+                    </div>
+                }
+            </div>
+
+            <div class="card shadow-sm border-0">
+                @if (viewMode == ViewMode.ByGroups)
+                {
+                    <div class="accordion accordion-flush" id="accordionStudents">
+                        @foreach (var g in grouppedStudents)
+                        {
+                            var collapseId = $"grp-{g.Key}";
+                            <div class="accordion-item border-bottom">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed bg-light fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId">
+                                        <span class="badge bg-primary me-2">@g.Value.Count()</span> @(groups.ContainsKey(g.Key) ? groups[g.Key].Name : "Без группы")
+                                    </button>
+                                </h2>
+                                <div id="@collapseId" class="accordion-collapse collapse" data-bs-parent="#accordionStudents">
+                                    <div class="accordion-body p-0">
+                                        @RenderTable(g.Value)
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    }
-                </div>
-            }
-            else
-            {
-                <div class="p-0">
-                    @RenderTable(students)
-                </div>
-            }
-        </div>
-    }
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="p-0">
+                        @RenderTable(students)
+                    </div>
+                }
+            </div>
+        }
+    </div>
 </div>
 
 

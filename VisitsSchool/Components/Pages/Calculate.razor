@@ -7,68 +7,75 @@
 @inject CalculateService serviceCalc
 @inject ScheduleService serviceSchedules
 
-<h3>Рассчет стоимости</h3>
-
-<div class="row g-3 mb-3">
-    <div class="col-md-4">
-        <label class="form-label">Выберите расписание</label>
-        <select class="form-select"
-                @bind="selectedScheduleId">
-            <option value=""></option>
-            @foreach (var itm in schedules)
-            {
-                <option value="@itm.Id">@itm.ScheduleName</option>
-            }
-        </select>
+<div class="container mt-4">
+    <div class="d-flex mb-4 border-bottom pb-2">
+        <h3 class="fw-bold mb-0">Рассчет стоимости</h3>
     </div>
 
-    <div class="col-md-4 d-flex align-items-end">
-        <button class="btn btn-primary w-100" @onclick="Calc">
-            Рассчитать
-        </button>
+    <div class="card shadow-sm border-0">
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <label class="form-label">Выберите расписание</label>
+                <select class="form-select"
+                        @bind="selectedScheduleId">
+                    <option value=""></option>
+                    @foreach (var itm in schedules)
+                    {
+                        <option value="@itm.Id">@itm.ScheduleName</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end">
+                <button class="btn btn-primary w-100" @onclick="Calc">
+                    Рассчитать
+                </button>
+            </div>
+        </div>
+
+        @if (isLoading)
+        {
+            <div class="d-flex align-items-center">
+                <strong>Считаем...</strong>
+                <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+            </div>
+        }
+        else
+        {
+            @if (results?.Any() == true)
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ФИО</th>
+                            <th>Кол-во посещений</th>
+                            <th>Кол-во отсутствий</th>
+                            <th>Кол-во болел</th>
+                            <th>Скидка</th>
+                            <th>К оплате</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in results)
+                        {
+                            <tr>
+                                <td>@item.StudentFullname</td>
+                                <td>@item.CountVisit</td>
+                                <td>@item.CountMissing</td>
+                                <td>@item.CountSick</td>
+                                <td>@item.Discount</td>
+                                <td>@item.Cost</td>
+                                <td><button class="btn" @onclick="(e)=>ShowDetailModal(item)">Подробнее</button></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        }
     </div>
 </div>
 
-@if (isLoading)
-{
-    <div class="d-flex align-items-center">
-        <strong>Считаем...</strong>
-        <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
-    </div>
-}
-else
-{
-    @if (results?.Any() == true)
-    {
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ФИО</th>
-                    <th>Кол-во посещений</th>
-                    <th>Кол-во отсутствий</th>
-                    <th>Кол-во болел</th>
-                    <th>Скидка</th>
-                    <th>К оплате</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in results)
-                {
-                    <tr>
-                        <td>@item.StudentFullname</td>
-                        <td>@item.CountVisit</td>
-                        <td>@item.CountMissing</td>
-                        <td>@item.CountSick</td>
-                        <td>@item.Discount</td>
-                        <td>@item.Cost</td>
-                        <td><button class="btn" @onclick="(e)=>ShowDetailModal(item)">Подробнее</button></td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-}
 
 <VisitsStudentDetailModal IsVisible="isVisibleDetail"
                           OnClose="HideDetailModal"
