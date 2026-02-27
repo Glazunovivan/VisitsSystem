@@ -14,10 +14,12 @@ namespace VisitSchool.DataAccessLayer
         /// Ученики
         /// </summary>
         public DbSet<Student> Students => Set<Student>(); 
+
         /// <summary>
         /// Группы
         /// </summary>
         public DbSet<Group> Groups => Set<Group>();
+
         /// <summary>
         /// Скидки
         /// </summary>

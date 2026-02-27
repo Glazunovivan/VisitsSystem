@@ -32,9 +32,9 @@ namespace VisitSchool.Repositories.SQLite
 
         public async Task<List<Group>> GetAllGroupsAsync()
         {
-            return await _db.Groups.Include(x=>x.Students)
-                                   .AsNoTracking()
-                                   .ToListAsync();
+                return await _db.Groups.Include(x => x.Students)
+                                       .AsNoTracking()
+                                       .ToListAsync();
         }
 
         public Task Update(int id, string name)

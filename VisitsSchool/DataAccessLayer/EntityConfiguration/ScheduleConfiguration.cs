@@ -10,6 +10,9 @@ namespace VisitSchool.DataAccessLayer.EntityConfiguration
         {
             builder.ToTable("Schedules").HasKey(x=>x.Id);
             builder.Property(x=>x.Id).ValueGeneratedOnAdd();
+
+            builder.HasMany(x => x.Groups)
+                   .WithOne();
         }
     }
 }

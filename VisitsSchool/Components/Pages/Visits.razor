@@ -113,7 +113,7 @@
                 else
                 {
                     <div class="p-0">
-                        @RenderTable(students)
+                        @RenderTable(allStudents)
                     </div>
                 }
             </div>
@@ -129,6 +129,7 @@
         public int StudentId { get; set; }
         public int Status { get; set; }
     }
+
     private enum ViewMode { ByGroups, All }
     private ViewMode viewMode = ViewMode.ByGroups;
 
@@ -139,7 +140,7 @@
 
     private Dictionary<int, Group> groups = new();
     private List<Schedule> schedules = new();
-    private List<Student> students = new();
+    private List<Student> allStudents = new();
     private List<DateTime> dates = new();
 
     private Dictionary<int, List<Student>> grouppedStudents = new();
@@ -156,16 +157,16 @@
         isEditing = false;
 
         schedules = await ScheduleService.GetAllSchedules();
-        students = await StudentService.GetAllStudentsAsync();
+        allStudents = await StudentService.GetAllStudentsAsync();
         var grps = await groupService.GetAllGroupsAsync();
         groups = grps.ToDictionary(x => x.Id);
         groups.Add(-1, new Group { Id = -1, Name="<без группы>" });
 
-        grouppedStudents = students.GroupBy(s => s.GroupId ?? -1)
-                                   .OrderBy(g => g.Key)
-                                   .ToDictionary(g=> g.Key, g=> g.ToList());
+        grouppedStudents = allStudents.GroupBy(s => s.GroupId ?? -1)
+                                      .OrderBy(g => g.Key)
+                                      .ToDictionary(g=> g.Key, g=> g.ToList());
 
-        attendanceRows = students.Select(x => new AttendenceRow
+        attendanceRows = allStudents.Select(x => new AttendenceRow
         {
             StudentId = x.Id,
             Status = 0
@@ -175,24 +176,47 @@
         isLoading = false;
     }
 
-    private void SelectDate(DateTime date)
+    private async Task SelectDate(DateTime date)
     {
         selectedDate = date;
+        isLoading = true;
 
         isEditing = false;
 
         attendanceRows.Clear();
-        var existsVisits = VisitService.GetVisitsByDate(date);
+        var existsVisits = await VisitService.GetVisitsByDate(date);
 
-        foreach (var s in students)
+        var schedule = schedules.First(x=>x.Id == selectedScheduleId);
+        if (schedule.Groups?.Count > 0)
         {
-            var visit = existsVisits.FirstOrDefault(x => x.StudentId == s.Id);
-            attendanceRows.Add(new AttendenceRow
+            foreach (var group in schedule.Groups)
             {
-                StudentId = s.Id,
-                Status = visit == null ? 0 : visit.Status 
-            });
+                foreach (var s in group.Students)
+                {
+                    var visit = existsVisits.FirstOrDefault(x => x.StudentId == s.Id);
+                    attendanceRows.Add(new AttendenceRow
+                    {
+                        StudentId = s.Id,
+                        Status = visit == null ? 0 : visit.Status
+                    });
+                }
+            }
         }
+        else
+        {
+            foreach (var s in allStudents)
+            {
+                var visit = existsVisits.FirstOrDefault(x => x.StudentId == s.Id);
+                attendanceRows.Add(new AttendenceRow
+                {
+                    StudentId = s.Id,
+                    Status = visit == null ? 0 : visit.Status
+                });
+            }
+        }
+
+
+        isLoading = false;
 
         StateHasChanged();
     }
@@ -256,6 +280,7 @@
     private void OnScheduleChange()
     {
         dates.Clear();
+
         attendanceRows.Clear();
 
         if (selectedScheduleId == null)
@@ -264,13 +289,19 @@
         }
 
         var schedule = schedules.FirstOrDefault(x => x.Id == selectedScheduleId);
+        if (schedule == null)
+        {
+            return;
+        }
+
         foreach (var d in schedule.Days.OrderBy(x=>x.Day))
         {
             dates.Add(new DateTime(schedule.Year, schedule.Month, d.Day));
         }
 
         var firstDate = dates.FirstOrDefault();
-        SelectDate(firstDate);
+
+        SelectDate(firstDate).GetAwaiter();
     }
 
     private void Editing(MouseEventArgs e)

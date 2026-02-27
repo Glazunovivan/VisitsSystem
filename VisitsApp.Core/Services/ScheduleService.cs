@@ -8,11 +8,13 @@ namespace VisitsApp.Core.Services
     {
         private readonly IScheduleRepository _repo;
         private readonly ILogger<ScheduleService> _logger;
+        private readonly IGroupRepository _groupRepository;
 
-        public ScheduleService(IScheduleRepository repo, ILogger<ScheduleService> logger)
+        public ScheduleService(IScheduleRepository repo, ILogger<ScheduleService> logger, IGroupRepository groupRepository)
         {
             _repo = repo;  
             _logger = logger;
+            _groupRepository = groupRepository; 
         }
 
         /// <summary>
@@ -30,6 +32,15 @@ namespace VisitsApp.Core.Services
                 _logger.LogError(ex.Message);
                 throw ex;
             }
+        }
+
+        /// <summary>
+        /// Получить группы
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<Group>> GetAllGroups()
+        {
+            return await _groupRepository.GetAllGroupsAsync();
         }
 
         /// <summary>

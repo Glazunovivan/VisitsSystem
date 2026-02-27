@@ -29,6 +29,12 @@
         /// </summary>
         public List<ScheduleDay?> Days { get; set; }
 
+
+        /// <summary>
+        /// К каким группам 
+        /// </summary>
+        public List<Group> Groups { get; set; } = new List<Group>();
+
         /// <summary>
         /// Стоимость занятия
         /// </summary>

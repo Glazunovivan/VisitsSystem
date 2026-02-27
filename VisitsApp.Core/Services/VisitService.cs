@@ -102,18 +102,18 @@ namespace VisitsApp.Core.Services
         /// </summary>
         /// <param name="dateTime"></param>
         /// <returns></returns>
-        public List<Visit> GetVisitsByDate(DateTime dateTime)
+        public async Task<List<Visit>> GetVisitsByDate(DateTime dateTime)
         {
             try
             {
-                var schedule = _scheduleRepo.Get(dateTime.Year, dateTime.Month).Result;
+                var schedule = await _scheduleRepo.Get(dateTime.Year, dateTime.Month);
 
                 if (_scheduleRepo is InMemoryScheduleRepository)
                 {
-                    _visitsRepo.IncludeSchedule(schedule.Id, schedule);
+                    await _visitsRepo.IncludeSchedule(schedule.Id, schedule);
                 }
 
-                var visits = _visitsRepo.GetVisitsByDate(dateTime).Result;
+                var visits = await _visitsRepo.GetVisitsByDate(dateTime);
 
                 return visits;
             }

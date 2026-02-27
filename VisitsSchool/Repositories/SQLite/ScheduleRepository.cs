@@ -43,6 +43,7 @@ namespace VisitSchool.Repositories.SQLite
         {
             return await _db.Schedules.AsNoTracking()
                                       .Include(x => x.Days)
+                                      .Include(x=> x.Groups)
                                       .FirstOrDefaultAsync(x=>x.Id == scheduleId);
         }
 
@@ -56,6 +57,7 @@ namespace VisitSchool.Repositories.SQLite
         {
             return await _db.Schedules.AsNoTracking()
                                       .Include(x => x.Days)
+                                      .Include(x => x.Groups)
                                       .FirstOrDefaultAsync(x=>x.Month == month && x.Year == year);
         }
 
@@ -67,6 +69,7 @@ namespace VisitSchool.Repositories.SQLite
         {
             return await _db.Schedules.AsNoTracking()
                                       .Include(x=>x.Days)
+                                      .Include(x=>x.Groups)
                                       .ToListAsync();
         }
 

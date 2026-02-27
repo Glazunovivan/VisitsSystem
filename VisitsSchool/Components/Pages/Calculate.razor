@@ -33,6 +33,26 @@
             </div>
         </div>
 
+        <div class="row">
+            <div class="col-md-4">
+                <label class="form-label">Расписание для перерасчета</label>
+                <select class="form-select"
+                        @bind="recalcSelectedScheduleId">
+                    <option value=""></option>
+                    @foreach (var itm in schedules.Where(x=>x.Id != (selectedScheduleId ?? -1)))
+                    {
+                        <option value="@itm.Id">@itm.ScheduleName</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end">
+                <button class="btn btn-primary w-100" @onclick="Calc">
+                    Рассчитать
+                </button>
+            </div>
+        </div>
+
         @if (isLoading)
         {
             <div class="d-flex align-items-center">
@@ -89,6 +109,8 @@
     private DateTime? endDate;
 
     private int? selectedScheduleId = null;
+    private int? recalcSelectedScheduleId = null;
+
     private List<VisitsApp.Core.Dtos.CostVisitStudentDto> results;
     private List<VisitsApp.Core.Models.Schedule> schedules;
 
