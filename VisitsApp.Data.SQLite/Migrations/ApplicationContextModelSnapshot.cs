@@ -17,6 +17,21 @@ namespace VisitsApp.Data.SQLite.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.24");
 
+            modelBuilder.Entity("GroupSchedule", b =>
+                {
+                    b.Property<int>("GroupsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SchedulesId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("GroupsId", "SchedulesId");
+
+                    b.HasIndex("SchedulesId");
+
+                    b.ToTable("GroupSchedule");
+                });
+
             modelBuilder.Entity("VisitsApp.Core.Models.DiscountCategory", b =>
                 {
                     b.Property<int>("Id")
@@ -45,12 +60,7 @@ namespace VisitsApp.Data.SQLite.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("ScheduleId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("ScheduleId");
 
                     b.ToTable("Groups");
                 });
@@ -166,11 +176,19 @@ namespace VisitsApp.Data.SQLite.Migrations
                     b.ToTable("Visits");
                 });
 
-            modelBuilder.Entity("VisitsApp.Core.Models.Group", b =>
+            modelBuilder.Entity("GroupSchedule", b =>
                 {
+                    b.HasOne("VisitsApp.Core.Models.Group", null)
+                        .WithMany()
+                        .HasForeignKey("GroupsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("VisitsApp.Core.Models.Schedule", null)
-                        .WithMany("Groups")
-                        .HasForeignKey("ScheduleId");
+                        .WithMany()
+                        .HasForeignKey("SchedulesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("VisitsApp.Core.Models.ScheduleDay", b =>
@@ -234,8 +252,6 @@ namespace VisitsApp.Data.SQLite.Migrations
             modelBuilder.Entity("VisitsApp.Core.Models.Schedule", b =>
                 {
                     b.Navigation("Days");
-
-                    b.Navigation("Groups");
                 });
 #pragma warning restore 612, 618
         }

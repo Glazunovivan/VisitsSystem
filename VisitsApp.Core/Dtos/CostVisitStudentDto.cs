@@ -56,5 +56,15 @@
         /// Название расписания
         /// </summary>
         public string ScheduleName { get; set; }
+
+        /// <summary>
+        /// Указание на перерасчет (название расписания, за которое прошёл перерасчёт)
+        /// </summary>
+        public string? NameRecalc { get; set; } = null;
+
+        /// <summary>
+        /// Сумма перерасчета
+        /// </summary>
+        public decimal? CostRecalc { get; set; } = null;
     }
 }

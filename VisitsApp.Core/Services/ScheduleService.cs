@@ -73,7 +73,7 @@ namespace VisitsApp.Core.Services
             }
         }
 
-        public async Task<Schedule> GetSchedule(int scheduleId)
+        public async Task<Schedule> GetScheduleAsync(int scheduleId)
         {
             try
             {

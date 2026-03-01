@@ -15,6 +15,13 @@ namespace VisitsApp.Data.SQLite
 
         public async Task<Schedule> Add(Schedule schedule)
         {
+            foreach (var group in schedule.Groups)
+            {
+                if (group.Id > 0) // Предполагаем, что Id > 0 означает существующий объект
+                {
+                    _db.Entry(group).State = EntityState.Unchanged;
+                }
+            }
             await _db.Schedules.AddAsync(schedule);
             await _db.SaveChangesAsync();
             return schedule;
@@ -43,6 +50,7 @@ namespace VisitsApp.Data.SQLite
             return await _db.Schedules.AsNoTracking()
                                       .Include(x => x.Days)
                                       .Include(x=> x.Groups)
+                                      .ThenInclude(x=>x.Students)
                                       .FirstOrDefaultAsync(x=>x.Id == scheduleId);
         }
 
@@ -57,6 +65,7 @@ namespace VisitsApp.Data.SQLite
             return await _db.Schedules.AsNoTracking()
                                       .Include(x => x.Days)
                                       .Include(x => x.Groups)
+                                      .ThenInclude(x=>x.Students)
                                       .FirstOrDefaultAsync(x=>x.Month == month && x.Year == year);
         }
 
@@ -69,6 +78,10 @@ namespace VisitsApp.Data.SQLite
             return await _db.Schedules.AsNoTracking()
                                       .Include(x=>x.Days)
                                       .Include(x=>x.Groups)
+                                      .ThenInclude(x=>x.Students)
+                                      .OrderByDescending(x=>x.Year)
+                                      .ThenByDescending(x=>x.Month)
+                                      .ThenByDescending(x=>x.ScheduleName)
                                       .ToListAsync();
         }
 

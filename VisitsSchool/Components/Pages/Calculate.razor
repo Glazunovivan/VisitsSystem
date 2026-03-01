@@ -25,12 +25,6 @@
                     }
                 </select>
             </div>
-
-            <div class="col-md-4 d-flex align-items-end">
-                <button class="btn btn-primary w-100" @onclick="Calc">
-                    Рассчитать
-                </button>
-            </div>
         </div>
 
         <div class="row">
@@ -122,6 +116,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        PrepareData();
+    }
+
+    private async Task PrepareData()
+    {
         isLoading = true;
 
         schedules = await serviceSchedules.GetAllSchedules();
@@ -129,7 +128,8 @@
         int currentYear = DateTime.Now.Year;
         int currentMonth = DateTime.Now.Month;
 
-        selectedScheduleId = schedules.FirstOrDefault(x=>x.Year == currentYear && x.Month == currentMonth)?.Id ?? null;
+        selectedScheduleId = schedules.FirstOrDefault(x => x.Year == currentYear && x.Month == currentMonth)?.Id ?? null;
+        recalcSelectedScheduleId = null;
 
         isLoading = false;
     }
@@ -143,10 +143,27 @@
 
         isLoading = true;
 
-        results = new List<CostVisitStudentDto>(30);
+        if (results == null)
+        {
+            results = new List<CostVisitStudentDto>(30);
+        }
+        else
+        {
+            results.Clear();
+        }
+
         try
         {
-            results.AddRange(await serviceCalc.CalculateCostVisits(selectedScheduleId.Value));
+            if (recalcSelectedScheduleId != null)
+            {
+                var data = await serviceCalc.CalculateCostVisits(selectedScheduleId.Value, recalcSelectedScheduleId.Value);
+                results.AddRange(data);
+            }
+            else
+            {
+                var data = await serviceCalc.CalculateCostVisits(selectedScheduleId.Value);
+                results.AddRange(data);
+            }
         }
         catch (Exception ex)
         {

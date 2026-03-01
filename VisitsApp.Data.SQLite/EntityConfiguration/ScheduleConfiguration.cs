@@ -12,7 +12,8 @@ namespace VisitsApp.Data.EntityConfiguration
             builder.Property(x=>x.Id).ValueGeneratedOnAdd();
 
             builder.HasMany(x => x.Groups)
-                   .WithOne();
+                   .WithMany(x => x.Schedules)
+                   .UsingEntity(e => e.ToTable("SchedulesGroups"));
         }
     }
 }

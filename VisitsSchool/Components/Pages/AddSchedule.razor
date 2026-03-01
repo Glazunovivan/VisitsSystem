@@ -192,7 +192,7 @@ else
     {
         if (Id != null)
         {
-            var loadedSchedule = await service.GetSchedule(Id.Value);
+            var loadedSchedule = await service.GetScheduleAsync(Id.Value);
 
             costSubscriptions = loadedSchedule.CostSubscriptions;
             selectedMonthIndex = loadedSchedule.Month-1;
@@ -212,6 +212,11 @@ else
                         ToggleDaySelection(date.Value);
                     }
                 }
+            }
+
+            foreach (var g in loadedSchedule.Groups)
+            {
+                SelectedGroupIds.Add(g.Id);
             }
 
             StateHasChanged();
@@ -256,6 +261,18 @@ else
             SelectedGroupIds.Add(groupId);
         else
             SelectedGroupIds.Remove(groupId);
+
+        var groupsName = availableGroups.Where(x => SelectedGroupIds.Contains(x.Key)).Select(x => x.Value.Name);
+
+        //помогаем дополнить имя расписания
+        if (selectedMonthIndex != null)
+        {
+            scheduleName = $"{months[selectedMonthIndex.Value]} {currentYear} ({string.Join(";", groupsName)})";
+        }
+        else
+        {
+            scheduleName = $"({string.Join(";", groupsName)})";
+        }
     }
 
     // Текст для отображения в кнопке
@@ -263,9 +280,8 @@ else
     {
         if (!SelectedGroupIds.Any()) return "Выберите группы...";
 
-        var names = availableGroups
-            .Where(g => SelectedGroupIds.Contains(g.Key))
-            .Select(g => g.Value.Name);
+        var names = availableGroups.Where(g => SelectedGroupIds.Contains(g.Key))
+                                   .Select(g => g.Value.Name);
 
         return string.Join(", ", names);
     }
@@ -310,7 +326,7 @@ else
             {
                 var days = SelectedDays.Select(x => x.Day).ToList();
                 //обновление
-                var schedule = await service.GetSchedule(Id.Value);
+                var schedule = await service.GetScheduleAsync(Id.Value);
                 schedule.Days.Clear();
                 foreach (var d in days)
                 {
@@ -320,6 +336,12 @@ else
                 schedule.Month = selectedMonthIndex.Value + 1;
                 schedule.ScheduleName = scheduleName;
                 schedule.Year = currentYear.Value;
+
+                schedule.Groups = new List<Group>();
+                foreach (var g in SelectedGroupIds)
+                {
+                    schedule.Groups.Add(availableGroups.FirstOrDefault(x=>x.Key == g).Value);
+                }
 
                 await service.UpdateShedule(schedule);
 
@@ -338,6 +360,12 @@ else
                     Year = currentYear.Value,
                     Days = new List<VisitsApp.Core.Models.ScheduleDay?>(days.Count)
                 };
+                schedule.Groups = new List<Group>();
+                foreach (var g in SelectedGroupIds)
+                {
+                    schedule.Groups.Add(availableGroups.FirstOrDefault(x => x.Key == g).Value);
+                }
+
                 foreach (var d in days)
                 {
                     schedule.Days.Add(new VisitsApp.Core.Models.ScheduleDay { Schedule = schedule, Day = d });

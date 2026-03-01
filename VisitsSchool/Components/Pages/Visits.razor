@@ -32,23 +32,26 @@
                 </select>
             </div>
 
-            <div class="col-md-6 col-lg-8 d-flex justify-content-md-end">
-                <div class="btn-group shadow-sm" role="group" aria-label="Вид отображения">
-                    <input type="radio" class="btn-check" name="viewmode"
-                           id="v_group" checked="@(viewMode == ViewMode.ByGroups)"
-                           @onclick="() => SetViewMode(ViewMode.ByGroups)">
-                    <label class="btn btn-outline-primary" for="v_group">
-                        <i class="bi bi-grid-fill me-1"></i> По группам
-                    </label>
+            @if (canSelectViewMode == true)
+            {
+                <div class="col-md-6 col-lg-8 d-flex justify-content-md-end">
+                    <div class="btn-group shadow-sm" role="group" aria-label="Вид отображения">
+                        <input type="radio" class="btn-check" name="viewmode"
+                               id="v_group" checked="@(viewMode == ViewMode.ByGroups)"
+                               @onclick="() => SetViewMode(ViewMode.ByGroups)">
+                        <label class="btn btn-outline-primary" for="v_group">
+                            <i class="bi bi-grid-fill me-1"></i> По группам
+                        </label>
 
-                    <input type="radio" class="btn-check"
-                           name="viewmode" id="v_all"
-                           checked="@(viewMode == ViewMode.All)" @onclick="() => SetViewMode(ViewMode.All)">
-                    <label class="btn btn-outline-primary" for="v_all">
-                        <i class="bi bi-list-ul me-1"></i> Все
-                    </label>
+                        <input type="radio" class="btn-check"
+                               name="viewmode" id="v_all"
+                               checked="@(viewMode == ViewMode.All)" @onclick="() => SetViewMode(ViewMode.All)">
+                        <label class="btn btn-outline-primary" for="v_all">
+                            <i class="bi bi-list-ul me-1"></i> Все
+                        </label>
+                    </div>
                 </div>
-            </div>
+            }
         </div>
 
         @if (selectedScheduleId != null)
@@ -130,6 +133,7 @@
         public int Status { get; set; }
     }
 
+    private bool canSelectViewMode = false;
     private enum ViewMode { ByGroups, All }
     private ViewMode viewMode = ViewMode.ByGroups;
 
@@ -157,14 +161,7 @@
         isEditing = false;
 
         schedules = await ScheduleService.GetAllSchedules();
-        allStudents = await StudentService.GetAllStudentsAsync();
-        var grps = await groupService.GetAllGroupsAsync();
-        groups = grps.ToDictionary(x => x.Id);
-        groups.Add(-1, new Group { Id = -1, Name="<без группы>" });
 
-        grouppedStudents = allStudents.GroupBy(s => s.GroupId ?? -1)
-                                      .OrderBy(g => g.Key)
-                                      .ToDictionary(g=> g.Key, g=> g.ToList());
 
         attendanceRows = allStudents.Select(x => new AttendenceRow
         {
@@ -277,8 +274,9 @@
         }
     }
 
-    private void OnScheduleChange()
+    private async Task OnScheduleChange()
     {
+        isLoading = true;
         dates.Clear();
 
         attendanceRows.Clear();
@@ -289,9 +287,43 @@
         }
 
         var schedule = schedules.FirstOrDefault(x => x.Id == selectedScheduleId);
-        if (schedule == null)
+        if (schedule?.Days == null)
         {
             return;
+        }
+
+        if (schedule.Groups?.Count > 1)
+        {
+            canSelectViewMode = true;
+            viewMode = ViewMode.ByGroups;
+
+            foreach (var g in schedule.Groups)
+            {
+                allStudents.AddRange(g.Students);
+            }
+
+            var grps = await groupService.GetAllGroupsAsync();
+            groups = grps.ToDictionary(x => x.Id);
+            groups.Add(-1, new Group { Id = -1, Name = "<без группы>" });
+
+            grouppedStudents = allStudents.GroupBy(s => s.GroupId ?? -1)
+                                          .OrderBy(g => g.Key)
+                                          .ToDictionary(g => g.Key, g => g.ToList());
+        }
+        else
+        {
+            canSelectViewMode = false;
+            viewMode = ViewMode.All;
+
+
+            allStudents = await StudentService.GetAllStudentsAsync();
+            var grps = await groupService.GetAllGroupsAsync();
+            groups = grps.ToDictionary(x => x.Id);
+            groups.Add(-1, new Group { Id = -1, Name = "<без группы>" });
+
+            grouppedStudents = allStudents.GroupBy(s => s.GroupId ?? -1)
+                                          .OrderBy(g => g.Key)
+                                          .ToDictionary(g => g.Key, g => g.ToList());
         }
 
         foreach (var d in schedule.Days.OrderBy(x=>x.Day))
@@ -302,6 +334,8 @@
         var firstDate = dates.FirstOrDefault();
 
         SelectDate(firstDate).GetAwaiter();
+
+        isLoading = false;
     }
 
     private void Editing(MouseEventArgs e)
