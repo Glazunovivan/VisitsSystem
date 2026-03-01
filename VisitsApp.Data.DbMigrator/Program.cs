@@ -1,0 +1,10 @@
+﻿namespace VisitsApp.Data.DbMigrator
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("This is a migrations project. Do not run directly.");
+        }
+    }
+}

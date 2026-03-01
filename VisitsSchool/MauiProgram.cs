@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using System.Reflection;
 using VisitsApp.Core.Repositories;
 using VisitsApp.Core.Services;
-using VisitSchool.DataAccessLayer;
-using VisitSchool.Repositories.SQLite;
+using VisitsApp.Data.SQLite;
 using VisitSchool.Services;
 
 namespace VisitSchool
@@ -58,8 +58,14 @@ namespace VisitSchool
                 builder.Logging.AddSerilog(dispose: true);
 
                 builder.Services.AddSingleton(new LogFileInfo(logPath));
+
+                // Получаем путь к БД для MAUI
+                string dbPath = Path.Combine(FileSystem.AppDataDirectory, "visits.db");
                 //dbcontext
-                builder.Services.AddDbContext<ApplicationContext>();
+                builder.Services.AddDbContext<ApplicationContext>(options =>
+                {
+                    options.UseSqlite($"Data Source={dbPath}");
+                });
 
 
                 builder.Services.AddSingleton<ToastService>();

@@ -1,0 +1,16 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using VisitsApp.Core.Models;
+
+namespace VisitsApp.Data.EntityConfiguration
+{
+    public class DiscountCategoryConfiguration : IEntityTypeConfiguration<DiscountCategory>
+    {
+        public void Configure(EntityTypeBuilder<DiscountCategory> builder)
+        {
+            builder.ToTable("DiscountCategories").HasKey(x=>x.Id);
+
+            builder.Property(x => x.Id).ValueGeneratedOnAdd();
+        }
+    }
+}

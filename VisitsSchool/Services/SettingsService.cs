@@ -1,6 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using VisitSchool.DataAccessLayer;
+using VisitsApp.Data.SQLite;
 
 namespace VisitSchool.Services
 {

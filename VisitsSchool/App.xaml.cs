@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using VisitSchool.DataAccessLayer;
+using VisitsApp.Data.SQLite;
 
 namespace VisitSchool
 {
@@ -11,7 +11,12 @@ namespace VisitSchool
         {
             InitializeComponent();
 
-            context.Database.Migrate();
+            try
+            {
+                context.Database.Migrate();
+            }
+            //миграции уже применены
+            catch (Exception ex) { }
             _context = context;
             MainPage = new MainPage();
         }

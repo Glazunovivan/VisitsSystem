@@ -7,6 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisitSchool", "VisitsSchool
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisitsApp.Core", "VisitsApp.Core\VisitsApp.Core.csproj", "{42F83A3C-C08D-462F-BD13-4E1C2CD57CAF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisitsApp.Client.Native", "VisitsApp.Client.Native\VisitsApp.Client.Native.csproj", "{AFAED957-C35E-4FBE-A649-767575A920A0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisitsApp.Data.SQLite", "VisitsApp.Data.SQLite\VisitsApp.Data.SQLite.csproj", "{02A9418F-0729-44EB-9F95-729AE1A6AC3C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisitsApp.Data.DbMigrator", "VisitsApp.Data.DbMigrator\VisitsApp.Data.DbMigrator.csproj", "{68F6E84F-8CDA-4D4B-953C-9495A32B552C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +32,27 @@ Global
 		{42F83A3C-C08D-462F-BD13-4E1C2CD57CAF}.MigrationDb|Any CPU.Build.0 = Debug|Any CPU
 		{42F83A3C-C08D-462F-BD13-4E1C2CD57CAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42F83A3C-C08D-462F-BD13-4E1C2CD57CAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFAED957-C35E-4FBE-A649-767575A920A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFAED957-C35E-4FBE-A649-767575A920A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFAED957-C35E-4FBE-A649-767575A920A0}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{AFAED957-C35E-4FBE-A649-767575A920A0}.MigrationDb|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFAED957-C35E-4FBE-A649-767575A920A0}.MigrationDb|Any CPU.Build.0 = Debug|Any CPU
+		{AFAED957-C35E-4FBE-A649-767575A920A0}.MigrationDb|Any CPU.Deploy.0 = Debug|Any CPU
+		{AFAED957-C35E-4FBE-A649-767575A920A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFAED957-C35E-4FBE-A649-767575A920A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFAED957-C35E-4FBE-A649-767575A920A0}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{02A9418F-0729-44EB-9F95-729AE1A6AC3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02A9418F-0729-44EB-9F95-729AE1A6AC3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02A9418F-0729-44EB-9F95-729AE1A6AC3C}.MigrationDb|Any CPU.ActiveCfg = Debug|Any CPU
+		{02A9418F-0729-44EB-9F95-729AE1A6AC3C}.MigrationDb|Any CPU.Build.0 = Debug|Any CPU
+		{02A9418F-0729-44EB-9F95-729AE1A6AC3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02A9418F-0729-44EB-9F95-729AE1A6AC3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68F6E84F-8CDA-4D4B-953C-9495A32B552C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68F6E84F-8CDA-4D4B-953C-9495A32B552C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68F6E84F-8CDA-4D4B-953C-9495A32B552C}.MigrationDb|Any CPU.ActiveCfg = Debug|Any CPU
+		{68F6E84F-8CDA-4D4B-953C-9495A32B552C}.MigrationDb|Any CPU.Build.0 = Debug|Any CPU
+		{68F6E84F-8CDA-4D4B-953C-9495A32B552C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68F6E84F-8CDA-4D4B-953C-9495A32B552C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
