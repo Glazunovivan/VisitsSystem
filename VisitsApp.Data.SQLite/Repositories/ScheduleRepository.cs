@@ -105,6 +105,14 @@ namespace VisitsApp.Data.SQLite
                 _db.Entry(trackedEntity).State = EntityState.Detached;
             }
 
+            foreach (var group in schedule.Groups)
+            {
+                if (group.Id > 0) // Предполагаем, что Id > 0 означает существующий объект
+                {
+                    _db.Entry(group).State = EntityState.Unchanged;
+                }
+            }
+
             // Теперь можно безопасно вызвать Update
             _db.Schedules.Update(schedule);
             await _db.SaveChangesAsync();
