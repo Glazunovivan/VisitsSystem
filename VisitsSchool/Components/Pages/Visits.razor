@@ -1,6 +1,7 @@
 ﻿@page "/visits"
 
 @using Microsoft.Extensions.Logging
+@using VisitsApp.Core.Dtos
 @using VisitsApp.Core.Models
 @using VisitsApp.Core.Services
 @using System.Globalization
@@ -131,6 +132,7 @@
     {
         public int StudentId { get; set; }
         public int Status { get; set; }
+        public bool IsChecked { get; set; } = false;
     }
 
     private bool canSelectViewMode = false;
@@ -150,6 +152,9 @@
     private Dictionary<int, List<Student>> grouppedStudents = new();
 
     private List<AttendenceRow> attendanceRows = new();
+
+    private bool selectAll = false;
+    private HashSet<int> selectedStudentIds = new HashSet<int>(); // Используем HashSet для быстрого добавления/удаления и проверки
 
     private bool isEditing;
     private bool isLoading;
@@ -194,7 +199,8 @@
                     attendanceRows.Add(new AttendenceRow
                     {
                         StudentId = s.Id,
-                        Status = visit == null ? 0 : visit.Status
+                        Status = visit == null ? 0 : visit.Status,
+                        IsChecked = false
                     });
                 }
             }
@@ -207,7 +213,8 @@
                 attendanceRows.Add(new AttendenceRow
                 {
                     StudentId = s.Id,
-                    Status = visit == null ? 0 : visit.Status
+                    Status = visit == null ? 0 : visit.Status,
+                    IsChecked = false
                 });
             }
         }
@@ -315,8 +322,8 @@
             canSelectViewMode = false;
             viewMode = ViewMode.All;
 
-
             allStudents = await StudentService.GetAllStudentsAsync();
+
             var grps = await groupService.GetAllGroupsAsync();
             groups = grps.ToDictionary(x => x.Id);
             groups.Add(-1, new Group { Id = -1, Name = "<без группы>" });
@@ -362,9 +369,78 @@
         _ => "bg-light text-muted border"
     };
 
+    // Метод для обработки чекбокса "выбрать все"
+    private void ToggleSelectAll()
+    {
+        if (selectAll)
+        {
+            foreach (var attendenceRow in attendanceRows)
+            {
+                attendenceRow.IsChecked = true;
+            }
+        }
+        else
+        {
+            foreach (var attendenceRow in attendanceRows)
+            {
+                attendenceRow.IsChecked = false;
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    private void UpdateStatusForChecked(int status)
+    {   
+        foreach (var ar in attendanceRows.Where(x=>x.IsChecked))
+        {
+            ar.Status = status;
+        }
+    }
+
+    // Метод для обработки чекбокса отдельной строки
+    private void ToggleStudentSelection(int studentId, ChangeEventArgs e)
+    {
+        bool isChecked = (bool)e.Value;
+        if (isChecked)
+        {
+            selectedStudentIds.Add(studentId);
+        }
+        else
+        {
+            selectedStudentIds.Remove(studentId);
+        }
+
+        // Если все студенты выбраны вручную, установить selectAll в true
+        // Если хотя бы один студент не выбран, установить selectAll в false
+        selectAll = allStudents.All(s => selectedStudentIds.Contains(s.Id));
+    }
+
     private void HideDetailModal()
     {
         
+    }
+
+    private void OnStatusChanged(ChangeEventArgs e, AttendenceRow changedRow)
+    {
+        // 1. Вручную обновляем статус для текущей строки
+        if (int.TryParse(e.Value?.ToString(), out int newStatus))
+        {
+            changedRow.Status = newStatus;
+
+            // 2. Проходимся по всем attendanceRows
+            foreach (var row in attendanceRows)
+            {
+                // 3. Если строка отмечена (IsChecked = true) И это НЕ та строка, которую мы только что изменили
+                if (row.IsChecked && row.StudentId != changedRow.StudentId)
+                {
+                    row.Status = newStatus;
+                }
+            }
+
+            // 4. Оповещаем Blazor о том, что состояние изменилось, чтобы перерисовать UI
+            StateHasChanged();
+        }
     }
 
     //Метод для отрисовки таблицы
@@ -374,6 +450,19 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
+                        @if(isEditing)
+                        {
+                            <th style="width:50px;">
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           id="selectAllCheckbox"
+                                           @bind="selectAll"
+                                           @bind:after="ToggleSelectAll">
+                                    <label class="form-check-label visually-hidden" for="selectAllCheckbox">Выбрать все</label>
+                                </div>
+                            </th>
+                        }
                         <th style="width: 200px;">Отметка</th>
                         <th>ФИО</th>
                         @if(viewMode == ViewMode.All)
@@ -390,14 +479,29 @@
                         if (row == null) continue;
 
                         <tr>
+                            @if(isEditing)
+                            {
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               @bind="@row.IsChecked"
+                                               id="studentCheckbox_@student.Id">
+                                        <label class="form-check-label visually-hidden"
+                                               for="studentCheckbox_@student.Id">Выбрать @student.Fullname</label>
+                                    </div>
+                                </td>
+                            }
                             <td>
                                 @if (isEditing)
                                 {
-                                    <select class="form-select form-select-sm border-primary" @bind="row.Status">
-                                        <option value="0">не был</option>
-                                        <option value="1">был</option>
-                                        <option value="2">был 1 час</option>
-                                        <option value="3">болеет</option>
+                                    <select class="form-select form-select-sm border-primary" 
+                                            @onchange="(e) => OnStatusChanged(e, row)"
+                                            >
+                                        <option value="0" selected="@(row.Status == 0)">не был</option>
+                                        <option value="1" selected="@(row.Status == 1)">был</option>
+                                        <option value="2" selected="@(row.Status == 2)">был 1 час</option>
+                                        <option value="3" selected="@(row.Status == 3)">болеет</option>
                                     </select>
                                 }
                                 else
